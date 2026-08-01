@@ -1,0 +1,271 @@
+@import "tailwindcss";
+
+:root {
+  /* Base */
+  --background: #fbf6f4;
+  --surface: #ffffff;
+  --foreground: #241d1b;
+  --muted: #8f847d;
+  --line: #efe7e2;
+
+  /* Brand — soft rose / nude */
+  --blush: #fbeeed;
+  --blush-deep: #f6dcda;
+  --rose: #d98f97;
+  --rose-deep: #c17681;
+  --plum: #7d4a5c;
+  --gold: #c9a96a;
+  --lilac: #cbb6e6;
+  --mint: #bfe3d6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-blush: var(--blush);
+  --color-blush-deep: var(--blush-deep);
+  --color-rose: var(--rose);
+  --color-rose-deep: var(--rose-deep);
+  --color-plum: var(--plum);
+  --color-gold: var(--gold);
+  --color-lilac: var(--lilac);
+  --color-mint: var(--mint);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--blush-deep);
+  color: var(--rose-deep);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--blush-deep); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* ============================================================
+   LIQUID GLASS SYSTEM
+   ============================================================ */
+
+/* Wrapped in @layer components so Tailwind positioning/rounding
+   utilities (absolute, fixed, rounded-*) always win over these
+   base styles — otherwise `.glass { position: relative }` would
+   override an `absolute` utility on the same element. */
+@layer components {
+
+/* Core frosted glass material — translucent, blurred, with a
+   bright specular top edge and soft inner glow (Apple-like). */
+.glass {
+  position: relative;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.22) 48%,
+      rgba(255, 255, 255, 0.34) 100%
+    );
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 10px 30px -12px rgba(125, 74, 92, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -12px 24px -18px rgba(255, 255, 255, 0.6);
+}
+
+/* Darker glass for the ink-colored surfaces */
+.glass-dark {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(40, 30, 30, 0.72) 0%,
+      rgba(40, 30, 30, 0.5) 100%
+    );
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 12px 40px -14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+/* Moving specular highlight that follows the pointer.
+   --mx / --my are set by the GlassCard component (0–100%). */
+.glass-shine::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    220px circle at var(--mx, 30%) var(--my, 0%),
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0) 55%
+  );
+  opacity: 0.65;
+  transition: opacity 0.4s var(--ease-out-soft);
+  mix-blend-mode: screen;
+}
+
+/* Refractive rim light on the edge */
+.glass-rim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0) 70%,
+    rgba(217, 143, 151, 0.5)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Liquid pill button — glass with a sweeping sheen and squish */
+.btn-liquid {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-out-soft);
+  will-change: transform;
+}
+.btn-liquid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  transform: skewX(-18deg);
+  transition: left 0.7s var(--ease-out-soft);
+}
+.btn-liquid:hover::after {
+  left: 140%;
+}
+.btn-liquid:hover {
+  transform: translateY(-2px);
+}
+.btn-liquid:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   ANIMATED LIQUID BACKGROUND
+   ============================================================ */
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurora span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  animation: float-blob 18s var(--ease-out-soft) infinite;
+}
+
+@keyframes float-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(6%, -8%) scale(1.12); }
+  66% { transform: translate(-8%, 6%) scale(0.94); }
+}
+
+/* Slow hue rotation for extra life */
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-4%, -6%) scale(1.08); }
+}
+
+/* ============================================================
+   MOTION
+   ============================================================ */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal { animation: rise 1s var(--ease-out-soft) both; }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 30s linear infinite; }
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 22s linear infinite; }
+
+.link-underline {
+  background-image: linear-gradient(var(--rose), var(--rose));
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s var(--ease-out-soft);
+}
+.link-underline:hover { background-size: 100% 1px; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Press squish for tappable cards */
+.squish {
+  transition: transform 0.3s var(--ease-spring);
+}
+.squish:active {
+  transform: scale(0.97);
+}
+
+} /* end @layer components */
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora span, .animate-marquee, .animate-spin-slow, .reveal {
+    animation: none !important;
+  }
+}
