@@ -4,15 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useCart } from "@/lib/cart";
-import { MNT, type Address } from "@/lib/products";
+import { MNT, type Address, type Promotion } from "@/lib/products";
+import { applyPromotions } from "@/lib/promotions";
 import { placeOrder } from "@/app/(store)/account/actions";
 
 export function CartView({
   user,
   addresses,
+  promotions,
+  products,
 }: {
   user: { name: string } | null;
   addresses: Address[];
+  promotions: Promotion[];
+  products: { slug: string; name: string; price: number }[];
 }) {
   const router = useRouter();
   const { items, subtotal, setQty, remove, clear } = useCart();
@@ -24,14 +29,28 @@ export function CartView({
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const shipping = subtotal >= 100000 || subtotal === 0 ? 0 : 6000;
-  const total = subtotal + shipping;
+  const promo = applyPromotions(
+    items.map((i) => ({ slug: i.slug, qty: i.qty, price: i.price })),
+    promotions,
+    products
+  );
+  const discount = Math.min(promo.discount, subtotal);
+  const net = subtotal - discount;
+  const shipping = net >= 100000 || subtotal === 0 ? 0 : 6000;
+  const total = net + shipping;
+  const nameOf = (slug: string) =>
+    products.find((p) => p.slug === slug)?.name ?? slug;
 
   const submitOrder = () =>
     startTransition(async () => {
       setError("");
       const res = await placeOrder({
-        items: items.map((i) => ({ slug: i.slug, qty: i.qty, shade: i.shade })),
+        items: items.map((i) => ({
+          slug: i.slug,
+          qty: i.qty,
+          shade: i.shade,
+          color: i.color,
+        })),
         addressId: addrId,
       });
       if (res.ok) {
@@ -128,10 +147,23 @@ export function CartView({
           <div className="space-y-3 text-sm">
             <Row label="Барааны дүн" value={MNT(subtotal)} />
             <Row label="Хүргэлт" value={shipping === 0 ? "Үнэгүй" : MNT(shipping)} />
+            {discount > 0 && (
+              <Row label="Хөнгөлөлт" value={`-${MNT(discount)}`} rose />
+            )}
             {shipping > 0 && (
-              <p className="text-xs text-muted">{MNT(100000 - subtotal)}-ийн бараа нэмбэл хүргэлт үнэгүй.</p>
+              <p className="text-xs text-muted">{MNT(100000 - net)}-ийн бараа нэмбэл хүргэлт үнэгүй.</p>
             )}
           </div>
+          {promo.freeItems.length > 0 && (
+            <div className="mt-3 rounded-xl bg-blush/60 px-3 py-2 text-xs text-rose-deep">
+              🎁 Бэлэг: {promo.freeItems.map((f) => nameOf(f.slug)).join(", ")}
+            </div>
+          )}
+          {promo.labels.length > 0 && (
+            <div className="mt-2 text-xs text-muted">
+              Урамшуулал: {[...new Set(promo.labels)].join(", ")}
+            </div>
+          )}
           <div className="my-5 h-px bg-line" />
           <div className="flex items-center justify-between">
             <span className="font-medium">Нийт төлөх</span>
@@ -235,11 +267,11 @@ export function CartView({
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, rose }: { label: string; value: string; rose?: boolean }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className={`font-medium ${rose ? "text-rose-deep" : ""}`}>{value}</span>
     </div>
   );
 }

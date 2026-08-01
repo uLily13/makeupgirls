@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductVisual } from "@/components/ProductVisual";
-import { getStore, resolveContent, visibleCategories, visibleProducts } from "@/lib/db";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { getStore, resolveContent, visibleCategories, withRatings } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export default async function Home() {
   const store = await getStore();
   const content = resolveContent(store);
   const cats = visibleCategories(store);
-  const prods = visibleProducts(store);
+  const prods = withRatings(store);
 
   const bestSellers = prods.filter((p) => p.badge === "Хит").slice(0, 4);
   const newArrivals = prods.filter((p) => p.badge === "Шинэ").slice(0, 4);
@@ -132,6 +133,9 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* Recently viewed (client, from localStorage) */}
+      <RecentlyViewed />
 
       {/* Value props */}
       <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">

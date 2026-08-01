@@ -8,6 +8,7 @@ import { logout } from "@/app/(store)/account/actions";
 const links = [
   { href: "/account", label: "Хяналт", exact: true },
   { href: "/account/orders", label: "Захиалгын түүх" },
+  { href: "/account/favorites", label: "Хадгалсан" },
   { href: "/account/addresses", label: "Хүргэлтийн хаяг" },
   { href: "/account/profile", label: "Профайл" },
 ];

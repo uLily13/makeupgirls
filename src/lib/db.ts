@@ -62,7 +62,27 @@ function adminUser(): User | null {
     passwordHash: hash,
     salt,
     addresses: [],
+    favorites: [],
     createdAt: new Date().toISOString(),
+  };
+}
+
+// Fill in the fields the seed products don't carry.
+function normaliseProduct(p: (typeof seedProducts)[number]) {
+  const colors = (p.shades ?? [p.shade]).map((hex, i) => ({
+    name: `Өнгө ${i + 1}`,
+    hex,
+  }));
+  return {
+    ...p,
+    colors,
+    images: [] as string[],
+    stock: 50,
+    usage:
+      "Цэвэрхэн арьсан дээр зохих хэмжээгээр түрхэж, жигд түгээнэ. Өдөр бүр хэрэглэж болно.",
+    priceHistory: [
+      { at: "2026-01-01T00:00:00.000Z", from: null as number | null, to: p.price, note: "Анхны үнэ" },
+    ],
   };
 }
 
@@ -71,15 +91,13 @@ function buildSeed(): Store {
   return {
     categories: seedCategories.map((c) => ({ ...c })),
     subcategories: seedSubcategories.map((s) => ({ ...s })),
-    products: seedProducts.map((p) => ({
-      ...p,
-      priceHistory: [
-        { at: "2026-01-01T00:00:00.000Z", from: null, to: p.price, note: "Анхны үнэ" },
-      ],
-    })),
+    products: seedProducts.map(normaliseProduct),
     content: seedContent.map((c) => ({ ...c, history: [] })),
     users: admin ? [admin] : [],
     orders: [],
+    reviews: [],
+    promotions: [],
+    feedback: [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -103,14 +121,35 @@ export async function getStore(): Promise<Store> {
   const store = res.rows[0].data;
   let changed = false;
 
-  // Back-fill arrays / users added after the store was first seeded.
-  if (!store.users) {
-    store.users = [];
-    changed = true;
+  // Back-fill arrays / fields added after the store was first seeded.
+  if (!store.users) { store.users = []; changed = true; }
+  if (!store.orders) { store.orders = []; changed = true; }
+  if (!store.reviews) { store.reviews = []; changed = true; }
+  if (!store.promotions) { store.promotions = []; changed = true; }
+  if (!store.feedback) { store.feedback = []; changed = true; }
+  for (const u of store.users) {
+    if (!u.favorites) {
+      u.favorites = [];
+      changed = true;
+    }
   }
-  if (!store.orders) {
-    store.orders = [];
-    changed = true;
+  for (const p of store.products) {
+    if (!p.colors) {
+      p.colors = (p.shades ?? [p.shade]).map((hex, i) => ({ name: `Өнгө ${i + 1}`, hex }));
+      changed = true;
+    }
+    if (!p.images) {
+      p.images = [];
+      changed = true;
+    }
+    if (typeof p.stock !== "number") {
+      p.stock = 50;
+      changed = true;
+    }
+    if (p.usage === undefined) {
+      p.usage = "";
+      changed = true;
+    }
   }
   // Ensure the env admin exists (idempotent by email).
   const admin = adminUser();
@@ -169,6 +208,16 @@ export function visibleSubcategories(store: Store, catSlug?: string) {
 
 export function visibleProducts(store: Store) {
   return store.products.filter((p) => !p.hidden);
+}
+
+/** Products with rating/reviews replaced by values derived from real reviews. */
+export function withRatings(store: Store, products = visibleProducts(store)) {
+  return products.map((p) => {
+    const rs = store.reviews.filter((r) => r.productSlug === p.slug);
+    if (rs.length === 0) return { ...p, rating: 0, reviews: 0 };
+    const avg = rs.reduce((n, r) => n + r.rating, 0) / rs.length;
+    return { ...p, rating: Math.round(avg * 10) / 10, reviews: rs.length };
+  });
 }
 
 export function countProductsInSub(store: Store, subSlug: string) {

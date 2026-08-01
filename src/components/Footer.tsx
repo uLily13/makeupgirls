@@ -71,7 +71,11 @@ export function Footer({
               <li>Хүргэлт ба төлбөр</li>
               <li>Буцаалт, солилцоо</li>
               <li>Түгээмэл асуулт</li>
-              <li>Холбоо барих</li>
+              <li>
+                <Link href="/contact" className="hover:text-rose">
+                  Санал хүсэлт / Холбоо барих
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -84,9 +88,9 @@ export function Footer({
               <li>{c("footer.phone")}</li>
               <li>{c("footer.email")}</li>
               <li className="flex gap-3 pt-2">
-                <Social>Instagram</Social>
-                <Social>Facebook</Social>
-                <Social>TikTok</Social>
+                {c("social.instagram") && <Social href={c("social.instagram")}>Instagram</Social>}
+                {c("social.facebook") && <Social href={c("social.facebook")}>Facebook</Social>}
+                {c("social.tiktok") && <Social href={c("social.tiktok")}>TikTok</Social>}
               </li>
             </ul>
           </div>
@@ -104,10 +108,15 @@ export function Footer({
   );
 }
 
-function Social({ children }: { children: React.ReactNode }) {
+function Social({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <span className="cursor-pointer text-foreground/70 hover:text-rose">
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-foreground/70 hover:text-rose"
+    >
       {children}
-    </span>
+    </a>
   );
 }

@@ -1,13 +1,28 @@
-// Refined gradient placeholder standing in for a product photo —
-// glossy, dimensional, with a specular highlight and floor reflection.
+// Renders a product photo when an image URL is present, otherwise a refined
+// gradient placeholder — glossy, with a specular highlight and floor reflection.
 export function ProductVisual({
   shade,
+  image,
   className = "",
 }: {
   shade: string;
+  image?: string;
   category?: string;
   className?: string;
 }) {
+  if (image) {
+    return (
+      <div className={`relative overflow-hidden bg-blush ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt=""
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      </div>
+    );
+  }
   return (
     <div
       className={`relative overflow-hidden ${className}`}

@@ -1,8 +1,16 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { getStore, saveStore } from "@/lib/db";
-import type { Product, Category, Subcategory } from "@/lib/products";
+import type {
+  Product,
+  Category,
+  Subcategory,
+  ColorVariant,
+  Promotion,
+  OrderStatus,
+} from "@/lib/products";
 
 // NOTE: These are public POST endpoints. Before production, gate every action
 // behind authentication/authorization (see the admin login TODO).
@@ -24,9 +32,11 @@ export type ProductInput = {
   subcategory: string;
   price: number;
   oldPrice?: number | null;
-  rating?: number;
-  reviews?: number;
   shade: string;
+  colors: ColorVariant[];
+  images: string[];
+  stock: number;
+  usage: string;
   badge?: Product["badge"] | "";
   short: string;
   description: string;
@@ -37,9 +47,10 @@ export async function saveProduct(input: ProductInput) {
   const store = await getStore();
   const idx = store.products.findIndex((p) => p.slug === input.slug);
   const badge = input.badge ? (input.badge as Product["badge"]) : undefined;
+  const colors = input.colors.filter((c) => c.hex);
+  const primary = colors[0]?.hex ?? input.shade;
 
   if (idx === -1) {
-    // create
     const product: Product = {
       slug: input.slug,
       name: input.name,
@@ -48,9 +59,13 @@ export async function saveProduct(input: ProductInput) {
       subcategory: input.subcategory,
       price: input.price,
       oldPrice: input.oldPrice ?? undefined,
-      rating: input.rating ?? 5,
-      reviews: input.reviews ?? 0,
-      shade: input.shade,
+      rating: 5,
+      reviews: 0,
+      shade: primary,
+      colors,
+      images: input.images.filter(Boolean),
+      stock: Math.max(0, input.stock),
+      usage: input.usage,
       badge,
       short: input.short,
       description: input.description,
@@ -61,7 +76,6 @@ export async function saveProduct(input: ProductInput) {
     store.products.push(product);
   } else {
     const p = store.products[idx];
-    // Log a price change if the price moved.
     if (p.price !== input.price) {
       p.priceHistory = p.priceHistory ?? [];
       p.priceHistory.push({ at: now(), from: p.price, to: input.price, note: "Үнэ шинэчлэл" });
@@ -73,9 +87,11 @@ export async function saveProduct(input: ProductInput) {
       subcategory: input.subcategory,
       price: input.price,
       oldPrice: input.oldPrice ?? undefined,
-      rating: input.rating ?? p.rating,
-      reviews: input.reviews ?? p.reviews,
-      shade: input.shade,
+      shade: primary,
+      colors,
+      images: input.images.filter(Boolean),
+      stock: Math.max(0, input.stock),
+      usage: input.usage,
       badge,
       short: input.short,
       description: input.description,
@@ -215,6 +231,87 @@ export async function restoreContent(key: string, historyIndex: number) {
     item.history.unshift({ value: item.value, at: now() });
     item.value = restored;
   }
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ PROMOTIONS ============================
+
+export type PromotionInput = Omit<Promotion, "id" | "createdAt"> & { id?: string };
+
+export async function savePromotion(input: PromotionInput) {
+  const store = await getStore();
+  if (input.id) {
+    const p = store.promotions.find((x) => x.id === input.id);
+    if (p) Object.assign(p, input);
+  } else {
+    store.promotions.push({
+      ...input,
+      id: randomUUID(),
+      createdAt: now(),
+    });
+  }
+  await saveStore(store);
+  refresh();
+}
+
+export async function togglePromotion(id: string) {
+  const store = await getStore();
+  const p = store.promotions.find((x) => x.id === id);
+  if (p) p.active = !p.active;
+  await saveStore(store);
+  refresh();
+}
+
+export async function deletePromotion(id: string) {
+  const store = await getStore();
+  store.promotions = store.promotions.filter((p) => p.id !== id);
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ ORDERS ============================
+
+export async function setOrderStatus(id: string, status: OrderStatus) {
+  const store = await getStore();
+  const order = store.orders.find((o) => o.id === id);
+  if (!order) return;
+
+  const wasCounted = order.stockApplied === true;
+  const shouldCount = status === "Баталгаажсан" || status === "Хүргэгдсэн";
+
+  // Decrement stock when an order becomes confirmed; restore if reverted/cancelled.
+  if (shouldCount && !wasCounted) {
+    for (const it of order.items) {
+      const p = store.products.find((x) => x.slug === it.slug);
+      if (p) p.stock = Math.max(0, p.stock - it.qty);
+    }
+    order.stockApplied = true;
+  } else if (!shouldCount && wasCounted) {
+    for (const it of order.items) {
+      const p = store.products.find((x) => x.slug === it.slug);
+      if (p) p.stock += it.qty;
+    }
+    order.stockApplied = false;
+  }
+  order.status = status;
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ FEEDBACK ============================
+
+export async function toggleFeedbackHandled(id: string) {
+  const store = await getStore();
+  const f = store.feedback.find((x) => x.id === id);
+  if (f) f.handled = !f.handled;
+  await saveStore(store);
+  refresh();
+}
+
+export async function deleteFeedback(id: string) {
+  const store = await getStore();
+  store.feedback = store.feedback.filter((f) => f.id !== id);
   await saveStore(store);
   refresh();
 }

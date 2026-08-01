@@ -15,6 +15,7 @@ export type CartItem = {
   brand: string;
   price: number;
   shade: string;
+  color?: string; // selected colour name
   qty: number;
 };
 

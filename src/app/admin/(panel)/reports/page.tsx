@@ -24,10 +24,59 @@ export default async function AdminReports() {
     .filter((h) => h.from !== null)
     .sort((a, b) => b.at.localeCompare(a.at));
 
+  // Sales metrics from confirmed/delivered orders
+  const fulfilled = store.orders.filter(
+    (o) => o.status === "Баталгаажсан" || o.status === "Хүргэгдсэн"
+  );
+  const revenue = fulfilled.reduce((n, o) => n + o.total, 0);
+  const avg = fulfilled.length ? Math.round(revenue / fulfilled.length) : 0;
+  const sold: Record<string, { name: string; qty: number }> = {};
+  for (const o of fulfilled)
+    for (const it of o.items) {
+      if (it.free) continue;
+      const s = (sold[it.slug] ??= { name: it.name, qty: 0 });
+      s.qty += it.qty;
+    }
+  const top = Object.values(sold).sort((a, b) => b.qty - a.qty).slice(0, 5);
+
   return (
     <div>
-      <h1 className="font-display text-3xl">Тайлан</h1>
-      <p className="mt-1 text-muted">Үнийн түүх ба идэвхтэй урамшуулал</p>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl">Тайлан</h1>
+          <p className="mt-1 text-muted">Борлуулалт, үнийн түүх, урамшуулал</p>
+        </div>
+        <a
+          href="/admin/reports/export"
+          className="rounded-full bg-green-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-700"
+        >
+          ⬇ Excel татах
+        </a>
+      </div>
+
+      {/* Sales metrics */}
+      <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Metric label="Нийт орлого" value={MNT(revenue)} />
+        <Metric label="Биелсэн захиалга" value={String(fulfilled.length)} />
+        <Metric label="Дундаж захиалга" value={MNT(avg)} />
+        <Metric label="Нийт захиалга" value={String(store.orders.length)} />
+      </div>
+
+      {top.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-rose-deep">
+            Хамгийн их зарагдсан
+          </h2>
+          <div className="overflow-hidden rounded-2xl border border-line">
+            {top.map((t, i) => (
+              <div key={i} className="flex items-center justify-between border-b border-line px-4 py-3 text-sm last:border-0">
+                <span className="font-medium">{i + 1}. {t.name}</span>
+                <span className="text-muted">{t.qty} ширхэг</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Active promotions */}
       <section className="mt-8">
@@ -118,6 +167,15 @@ export default async function AdminReports() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-line p-5">
+      <div className="font-display text-2xl">{value}</div>
+      <div className="mt-1 text-sm text-muted">{label}</div>
     </div>
   );
 }

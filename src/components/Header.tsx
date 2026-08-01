@@ -15,10 +15,12 @@ export function Header({
   menu,
   announcements,
   user,
+  favCount,
 }: {
   menu: MenuCategory[];
   announcements: string[];
   user: { name: string } | null;
+  favCount: number;
 }) {
   const { count, setOpen } = useCart();
   const [scrolled, setScrolled] = useState(false);
@@ -134,6 +136,18 @@ export function Header({
             <button aria-label="Хайх" className="hover:text-rose-deep">
               <SearchIcon />
             </button>
+            <Link
+              href={user ? "/account/favorites" : "/login"}
+              aria-label="Хадгалсан"
+              className="relative hidden h-9 w-9 place-items-center rounded-full transition-colors hover:bg-white/50 sm:grid"
+            >
+              <HeartIcon />
+              {favCount > 0 && (
+                <span className="absolute -right-1 -top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-rose-deep px-1 text-[10px] font-semibold text-white shadow">
+                  {favCount}
+                </span>
+              )}
+            </Link>
             <Link
               href={user ? "/account" : "/login"}
               aria-label={user ? "Миний бүртгэл" : "Нэвтрэх"}
@@ -278,6 +292,13 @@ function SearchIcon() {
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" />
       <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+function HeartIcon() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+      <path d="M12 20s-7-4.5-9.5-9A4.5 4.5 0 0112 5a4.5 4.5 0 019.5 6c-2.5 4.5-9.5 9-9.5 9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
     </svg>
   );
 }

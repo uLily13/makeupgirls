@@ -9,7 +9,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", phone: "", password: "" });
   const isLogin = mode === "login";
 
   const submit = (e: React.FormEvent) => {
@@ -17,7 +17,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     setError("");
     startTransition(async () => {
       const res = isLogin
-        ? await login({ email: form.email, password: form.password })
+        ? await login({ phone: form.phone, password: form.password })
         : await register(form);
       if (res.ok) {
         router.push("/account");
@@ -58,15 +58,15 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               />
             </Field>
           )}
-          <Field label="И-мэйл">
+          <Field label="Утасны дугаар">
             <input
-              type="email"
+              type="tel"
               required
-              autoComplete="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              autoComplete="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
               className={inputCls}
-              placeholder="name@example.com"
+              placeholder="99xxxxxx"
             />
           </Field>
           <Field label="Нууц үг">

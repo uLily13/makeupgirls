@@ -1,4 +1,5 @@
 import { CartProvider } from "@/lib/cart";
+import { FavoritesProvider } from "@/lib/favorites";
 import { Header, type MenuCategory } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -44,19 +45,22 @@ export default async function StoreLayout({
   return (
     <>
       <LiquidBackground />
-      <CartProvider>
-        <Header
-          menu={menu}
-          announcements={announcements}
-          user={user ? { name: user.name } : null}
-        />
-        <main className="flex-1">{children}</main>
-        <Footer
-          categories={menu.map((m) => ({ slug: m.slug, name: m.name }))}
-          content={content}
-        />
-        <CartDrawer />
-      </CartProvider>
+      <FavoritesProvider initial={user?.favorites ?? []} loggedIn={!!user}>
+        <CartProvider>
+          <Header
+            menu={menu}
+            announcements={announcements}
+            user={user ? { name: user.name } : null}
+            favCount={user?.favorites?.length ?? 0}
+          />
+          <main className="flex-1">{children}</main>
+          <Footer
+            categories={menu.map((m) => ({ slug: m.slug, name: m.name }))}
+            content={content}
+          />
+          <CartDrawer />
+        </CartProvider>
+      </FavoritesProvider>
     </>
   );
 }

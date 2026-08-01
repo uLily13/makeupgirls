@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MNT } from "@/lib/products";
-import { getStore, visibleProducts } from "@/lib/db";
-import { ProductVisual } from "@/components/ProductVisual";
+import { getStore, visibleProducts, withRatings } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { ProductCard } from "@/components/ProductCard";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { TrackRecentlyViewed } from "@/components/RecentlyViewed";
 import { AddToCart } from "./AddToCart";
+import { ProductGallery } from "./ProductGallery";
+import { ReviewSection } from "./ReviewSection";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +30,14 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
   const store = await getStore();
-  const product = visibleProducts(store).find((p) => p.slug === slug);
+  const rated = withRatings(store);
+  const product = rated.find((p) => p.slug === slug);
   if (!product) notFound();
 
+  const user = await getCurrentUser();
   const category = store.categories.find((c) => c.slug === product.category);
-  const related = visibleProducts(store)
+  const reviews = store.reviews.filter((r) => r.productSlug === product.slug);
+  const related = rated
     .filter((p) => p.category === product.category && p.slug !== product.slug)
     .slice(0, 4);
   const discount = product.oldPrice
@@ -39,11 +46,20 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+      <TrackRecentlyViewed
+        product={{
+          slug: product.slug,
+          name: product.name,
+          brand: product.brand,
+          price: product.price,
+          shade: product.shade,
+          image: product.images?.[0],
+        }}
+      />
+
       {/* Breadcrumb */}
-      <nav className="mb-8 flex items-center gap-2 text-sm text-muted">
-        <Link href="/" className="hover:text-rose">
-          Нүүр
-        </Link>
+      <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted">
+        <Link href="/" className="hover:text-rose">Нүүр</Link>
         <span>/</span>
         <Link href={`/shop?cat=${product.category}`} className="hover:text-rose">
           {category?.name}
@@ -54,27 +70,11 @@ export default async function ProductPage({
 
       <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
         {/* Gallery */}
-        <div className="flex flex-col gap-4">
-          <ProductVisual
-            shade={product.shade}
-            category={product.category}
-            className="aspect-square w-full rounded-3xl"
-          />
-          <div className="grid grid-cols-4 gap-3">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="aspect-square overflow-hidden rounded-xl bg-blush"
-              >
-                <ProductVisual
-                  shade={product.shades?.[i] ?? product.shade}
-                  category={product.category}
-                  className="h-full w-full"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <ProductGallery
+          images={product.images ?? []}
+          shade={product.shade}
+          colors={product.colors ?? []}
+        />
 
         {/* Info */}
         <div className="flex flex-col">
@@ -86,10 +86,21 @@ export default async function ProductPage({
           </h1>
 
           <div className="mt-3 flex items-center gap-3 text-sm">
-            <span className="text-gold">★★★★★</span>
-            <span className="text-muted">
-              {product.rating.toFixed(1)} · {product.reviews} сэтгэгдэл
-            </span>
+            {product.reviews > 0 ? (
+              <>
+                <span className="text-gold">
+                  {"★★★★★".slice(0, Math.round(product.rating))}
+                  <span className="text-line">
+                    {"★★★★★".slice(Math.round(product.rating))}
+                  </span>
+                </span>
+                <span className="text-muted">
+                  {product.rating.toFixed(1)} · {product.reviews} сэтгэгдэл
+                </span>
+              </>
+            ) : (
+              <span className="text-muted">Сэтгэгдэлгүй</span>
+            )}
           </div>
 
           <div className="mt-5 flex items-center gap-3">
@@ -114,22 +125,41 @@ export default async function ProductPage({
 
           <AddToCart product={product} />
 
-          {/* Ingredients */}
-          <div className="mt-10">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
-              Гол найрлага
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {product.ingredients.map((ing) => (
-                <span
-                  key={ing}
-                  className="rounded-full bg-blush px-4 py-2 text-sm text-rose-deep"
-                >
-                  {ing}
-                </span>
-              ))}
-            </div>
+          <div className="mt-5">
+            <FavoriteButton slug={product.slug} />
           </div>
+
+          {/* Ingredients */}
+          {product.ingredients.length > 0 && (
+            <div className="mt-10">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+                Гол найрлага
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {product.ingredients.map((ing) => (
+                  <span
+                    key={ing}
+                    className="rounded-full bg-blush px-4 py-2 text-sm text-rose-deep"
+                  >
+                    {ing}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Usage instructions */}
+          {product.usage && (
+            <details className="group mt-6 rounded-2xl border border-line p-5">
+              <summary className="flex cursor-pointer items-center justify-between font-medium">
+                Хэрэглэх заавар
+                <span className="text-muted transition-transform group-open:rotate-180">⌄</span>
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-foreground/75">
+                {product.usage}
+              </p>
+            </details>
+          )}
 
           {/* Assurance */}
           <div className="mt-8 grid grid-cols-2 gap-4 text-sm">
@@ -151,9 +181,12 @@ export default async function ProductPage({
         </div>
       </div>
 
+      {/* Reviews */}
+      <ReviewSection slug={product.slug} reviews={reviews} loggedIn={!!user} />
+
       {/* Related */}
       {related.length > 0 && (
-        <section className="mt-24">
+        <section className="mt-16">
           <h2 className="mb-8 font-display text-2xl">Танд бас таалагдаж магадгүй</h2>
           <div className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-4 md:gap-6">
             {related.map((p) => (

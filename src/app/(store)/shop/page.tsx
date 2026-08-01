@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { ShopClient } from "./ShopClient";
-import { getStore, visibleCategories, visibleSubcategories, visibleProducts } from "@/lib/db";
+import { getStore, visibleCategories, visibleSubcategories, withRatings } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export default async function ShopPage() {
   const store = await getStore();
   const categories = visibleCategories(store);
   const subcategories = visibleSubcategories(store);
-  const products = visibleProducts(store);
+  const products = withRatings(store);
 
   return (
     <Suspense

@@ -21,6 +21,13 @@ export type PriceChange = {
   note?: string; // e.g. "Урамшуулал", "Үнэ шинэчлэл"
 };
 
+// A selectable colour/shade of a product.
+export type ColorVariant = {
+  name: string; // "Ягаан", "Улаан", ...
+  hex: string; // swatch colour
+  image?: string; // optional image URL for this colour
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -29,16 +36,65 @@ export type Product = {
   subcategory: string; // subcategory slug
   price: number; // MNT — current selling price
   oldPrice?: number; // compare-at (strikethrough) price when on promotion
-  rating: number;
-  reviews: number;
-  shade: string; // primary swatch color
-  shades?: string[];
+  rating: number; // seed/fallback — real rating derived from reviews
+  reviews: number; // seed/fallback count
+  shade: string; // primary swatch colour (fallback)
+  shades?: string[]; // legacy — replaced by `colors`
+  colors: ColorVariant[]; // selectable colour variants
+  images: string[]; // image URLs (first = main); empty = gradient fallback
+  stock: number; // available inventory
+  usage: string; // хэрэглэх заавар
   badge?: "Шинэ" | "Хит" | "Хямдрал";
   short: string;
   description: string;
   ingredients: string[];
   hidden?: boolean; // hidden from the customer storefront
   priceHistory?: PriceChange[]; // full price change log for reports
+};
+
+// -------- Reviews --------
+
+export type Review = {
+  id: string;
+  productSlug: string;
+  userId: string;
+  userName: string;
+  rating: number; // 1–5
+  text: string;
+  createdAt: string;
+};
+
+// -------- Promotions --------
+
+export type PromotionType =
+  | "percent" // %-ийн хөнгөлөлт
+  | "amount" // мөнгөн дүнгийн хөнгөлөлт
+  | "bogo" // N авбал M үнэгүй (1+1)
+  | "gift"; // A бүтээгдэхүүн авбал B үнэгүй дагалдана
+
+export type Promotion = {
+  id: string;
+  title: string;
+  type: PromotionType;
+  active: boolean;
+  productSlugs: string[]; // бүтээгдэхүүнүүд (хамрах хүрээ)
+  value?: number; // percent (0–100) эсвэл amount (₮)
+  buyQty?: number; // bogo: хэдэн авбал
+  freeQty?: number; // bogo: хэдэн үнэгүй
+  giftSlug?: string; // gift: дагалдах бүтээгдэхүүн
+  minQty?: number; // gift: доод тоо
+  createdAt: string;
+};
+
+// -------- Feedback / contact messages --------
+
+export type Feedback = {
+  id: string;
+  name: string;
+  contact: string;
+  message: string;
+  createdAt: string;
+  handled?: boolean;
 };
 
 // Editable site text — every value keeps its previous versions.
@@ -69,13 +125,14 @@ export type Role = "admin" | "customer";
 
 export type User = {
   id: string;
-  email: string;
+  email?: string; // optional — admins use email, customers use phone
   name: string;
-  phone?: string;
+  phone?: string; // customer login identifier
   role: Role;
   passwordHash: string;
   salt: string;
   addresses: Address[];
+  favorites: string[]; // favourited product slugs
   createdAt: string;
 };
 
@@ -89,19 +146,27 @@ export type OrderItem = {
   price: number;
   qty: number;
   shade: string;
+  color?: string; // selected colour name
+  free?: boolean; // added free by a promotion
 };
 
-export type OrderStatus = "Хүлээгдэж буй" | "Хүргэгдсэн" | "Цуцлагдсан";
+export type OrderStatus =
+  | "Хүлээгдэж буй"
+  | "Баталгаажсан"
+  | "Хүргэгдсэн"
+  | "Цуцлагдсан";
 
 export type Order = {
   id: string;
   userId: string;
   items: OrderItem[];
   subtotal: number;
+  discount: number; // promotion discount applied
   shipping: number;
   total: number;
   address: Address | null;
   status: OrderStatus;
+  stockApplied?: boolean; // stock already decremented (on confirm)
   createdAt: string;
 };
 
@@ -112,6 +177,9 @@ export type Store = {
   content: ContentItem[];
   users: User[];
   orders: Order[];
+  reviews: Review[];
+  promotions: Promotion[];
+  feedback: Feedback[];
   updatedAt: string;
 };
 
@@ -161,8 +229,14 @@ export const subcategories: Subcategory[] = [
 export const MNT = (n: number) =>
   new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
-// Soft placeholder gradients per category — used when no image asset present.
-export const products: Product[] = [
+// Seed products carry the core fields; db.ts normalises them into full
+// Product objects (adding colors/images/stock/usage defaults).
+export type SeedProduct = Omit<
+  Product,
+  "colors" | "images" | "stock" | "usage" | "priceHistory"
+>;
+
+export const products: SeedProduct[] = [
   {
     slug: "velvet-blur-lip-tint",
     subcategory: "lip-tint",
@@ -366,27 +440,16 @@ export const products: Product[] = [
   },
 ];
 
-export function getProduct(slug: string) {
-  return products.find((p) => p.slug === slug);
-}
+// -------- Derived helpers (operate on store data) --------
 
-export function getCategory(slug: string) {
-  return categories.find((c) => c.slug === slug);
-}
-
-export function getSubcategory(slug: string) {
-  return subcategories.find((s) => s.slug === slug);
-}
-
-export function subcategoriesByCategory(catSlug: string) {
-  return subcategories.filter((s) => s.category === catSlug);
-}
-
-export function productsByCategory(slug: string) {
-  return products.filter((p) => p.category === slug);
-}
-
-// Count of in-stock products per subcategory (0 = coming soon).
-export function countBySubcategory(subSlug: string) {
-  return products.filter((p) => p.subcategory === subSlug).length;
+/** Average review rating for a product, falling back to the seed rating. */
+export function ratingFor(
+  reviews: Review[],
+  slug: string,
+  fallback: number
+): { rating: number; count: number } {
+  const rs = reviews.filter((r) => r.productSlug === slug);
+  if (rs.length === 0) return { rating: fallback, count: 0 };
+  const avg = rs.reduce((n, r) => n + r.rating, 0) / rs.length;
+  return { rating: Math.round(avg * 10) / 10, count: rs.length };
 }

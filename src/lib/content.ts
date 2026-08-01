@@ -60,4 +60,9 @@ export const seedContent: Omit<ContentItem, "history">[] = [
   { key: "footer.address", group: "Footer", label: "Хаяг", value: "Улаанбаатар, Монгол" },
   { key: "footer.phone", group: "Footer", label: "Утас", value: "+976 8000 0000" },
   { key: "footer.email", group: "Footer", label: "И-мэйл", value: "hello@makeupgirls.mn" },
+
+  // Social links
+  { key: "social.facebook", group: "Сошиал холбоос", label: "Facebook URL", value: "https://facebook.com/makeupgirls.mn" },
+  { key: "social.instagram", group: "Сошиал холбоос", label: "Instagram URL", value: "https://instagram.com/makeupgirls.mn" },
+  { key: "social.tiktok", group: "Сошиал холбоос", label: "TikTok URL", value: "https://tiktok.com/@makeupgirls.mn" },
 ];

@@ -14,7 +14,7 @@ import {
 
 const BADGES = ["", "Шинэ", "Хит", "Хямдрал"] as const;
 
-type FormState = ProductInput & { ingredientsText: string };
+type FormState = ProductInput & { ingredientsText: string; imagesText: string };
 
 const empty = (): FormState => ({
   slug: "",
@@ -24,9 +24,12 @@ const empty = (): FormState => ({
   subcategory: "",
   price: 0,
   oldPrice: null,
-  rating: 5,
-  reviews: 0,
   shade: "#d98f97",
+  colors: [{ name: "Өнгө 1", hex: "#d98f97" }],
+  images: [],
+  imagesText: "",
+  stock: 50,
+  usage: "",
   badge: "",
   short: "",
   description: "",
@@ -66,9 +69,12 @@ export function ProductManager({
       subcategory: p.subcategory,
       price: p.price,
       oldPrice: p.oldPrice ?? null,
-      rating: p.rating,
-      reviews: p.reviews,
       shade: p.shade,
+      colors: p.colors?.length ? p.colors : [{ name: "Өнгө 1", hex: p.shade }],
+      images: p.images ?? [],
+      imagesText: (p.images ?? []).join("\n"),
+      stock: p.stock ?? 0,
+      usage: p.usage ?? "",
       badge: p.badge ?? "",
       short: p.short,
       description: p.description,
@@ -90,6 +96,11 @@ export function ProductManager({
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
+      images: form.imagesText
+        .split(/[\n,]/)
+        .map((s) => s.trim())
+        .filter(Boolean),
+      colors: form.colors.filter((c) => c.hex),
     };
     run(async () => {
       await saveProduct(input);
@@ -159,6 +170,11 @@ export function ProductManager({
                         <Tag color="muted">Нуусан</Tag>
                       ) : (
                         <Tag color="green">Идэвхтэй</Tag>
+                      )}
+                      {p.stock <= 0 ? (
+                        <Tag color="rose">Дууссан</Tag>
+                      ) : (
+                        <Tag color="muted">Үлдэгдэл: {p.stock}</Tag>
                       )}
                       {onSale && <Tag color="rose">Урамшуулал</Tag>}
                       {p.badge && <Tag color="gold">{p.badge}</Tag>}
@@ -277,19 +293,69 @@ export function ProductManager({
                 className={inputCls}
               />
             </Field>
-            <Field label="Өнгө (swatch)">
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={form.shade}
-                  onChange={(e) => setForm({ ...form, shade: e.target.value })}
-                  className="h-10 w-14 rounded-lg border border-line"
-                />
-                <input
-                  value={form.shade}
-                  onChange={(e) => setForm({ ...form, shade: e.target.value })}
-                  className={inputCls}
-                />
+            <Field label="Өнгөнүүд (олон өнгө нэмж болно)" full>
+              <div className="space-y-2">
+                {form.colors.map((col, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={col.hex}
+                      onChange={(e) => {
+                        const colors = [...form.colors];
+                        colors[i] = { ...col, hex: e.target.value };
+                        setForm({ ...form, colors });
+                      }}
+                      className="h-9 w-11 shrink-0 rounded-lg border border-line"
+                    />
+                    <input
+                      value={col.name}
+                      placeholder="Өнгөний нэр"
+                      onChange={(e) => {
+                        const colors = [...form.colors];
+                        colors[i] = { ...col, name: e.target.value };
+                        setForm({ ...form, colors });
+                      }}
+                      className={inputCls}
+                    />
+                    <input
+                      value={col.image ?? ""}
+                      placeholder="Зураг URL (заавал биш)"
+                      onChange={(e) => {
+                        const colors = [...form.colors];
+                        colors[i] = { ...col, image: e.target.value };
+                        setForm({ ...form, colors });
+                      }}
+                      className={inputCls}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          colors: form.colors.filter((_, j) => j !== i),
+                        })
+                      }
+                      className="shrink-0 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs text-red-500"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      colors: [
+                        ...form.colors,
+                        { name: `Өнгө ${form.colors.length + 1}`, hex: "#d98f97" },
+                      ],
+                    })
+                  }
+                  className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium hover:border-rose hover:text-rose-deep"
+                >
+                  + Өнгө нэмэх
+                </button>
               </div>
             </Field>
             <Field label="Ангилал">
@@ -348,23 +414,12 @@ export function ProductManager({
                 className={inputCls}
               />
             </Field>
-            <Field label="Үнэлгээ (1–5)">
+            <Field label="Үлдэгдэл (ширхэг)">
               <input
                 type="number"
-                step="0.1"
-                value={form.rating}
+                value={form.stock}
                 onChange={(e) =>
-                  setForm({ ...form, rating: Number(e.target.value) })
-                }
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Сэтгэгдлийн тоо">
-              <input
-                type="number"
-                value={form.reviews}
-                onChange={(e) =>
-                  setForm({ ...form, reviews: Number(e.target.value) })
+                  setForm({ ...form, stock: Number(e.target.value) })
                 }
                 className={inputCls}
               />
@@ -407,6 +462,25 @@ export function ProductManager({
                 onChange={(e) =>
                   setForm({ ...form, description: e.target.value })
                 }
+                className={`${inputCls} resize-none`}
+              />
+            </Field>
+            <Field label="Хэрэглэх заавар" full>
+              <textarea
+                rows={2}
+                value={form.usage}
+                onChange={(e) => setForm({ ...form, usage: e.target.value })}
+                className={`${inputCls} resize-none`}
+              />
+            </Field>
+            <Field label="Зургийн URL-ууд (мөр бүрт нэг)" full>
+              <textarea
+                rows={2}
+                value={form.imagesText}
+                onChange={(e) =>
+                  setForm({ ...form, imagesText: e.target.value })
+                }
+                placeholder="https://... (хоосон бол дизайн placeholder харагдана)"
                 className={`${inputCls} resize-none`}
               />
             </Field>

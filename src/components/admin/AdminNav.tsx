@@ -7,9 +7,12 @@ import { adminLogout } from "@/app/admin/login/actions";
 
 const links = [
   { href: "/admin", label: "Хяналт", icon: "◵", exact: true },
+  { href: "/admin/orders", label: "Захиалга", icon: "🛍" },
   { href: "/admin/products", label: "Бүтээгдэхүүн", icon: "▤" },
+  { href: "/admin/promotions", label: "Урамшуулал", icon: "％" },
   { href: "/admin/menu", label: "Цэс / Ангилал", icon: "☰" },
   { href: "/admin/content", label: "Текст контент", icon: "✎" },
+  { href: "/admin/feedback", label: "Санал хүсэлт", icon: "✉" },
   { href: "/admin/reports", label: "Тайлан", icon: "◷" },
 ];
 

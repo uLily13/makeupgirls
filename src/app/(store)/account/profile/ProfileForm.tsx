@@ -5,11 +5,9 @@ import { useRouter } from "next/navigation";
 import { updateProfile } from "@/app/(store)/account/actions";
 
 export function ProfileForm({
-  email,
   name,
   phone,
 }: {
-  email: string;
   name: string;
   phone: string;
 }) {
@@ -32,14 +30,6 @@ export function ProfileForm({
     <div className="rounded-2xl border border-line p-6 md:p-8">
       <h2 className="text-lg font-semibold">Хувийн мэдээлэл</h2>
       <form onSubmit={submit} className="mt-5 max-w-md space-y-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-muted">И-мэйл</span>
-          <input
-            value={email}
-            disabled
-            className="w-full rounded-xl border border-line bg-gray-50 px-4 py-2.5 text-sm text-muted"
-          />
-        </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted">Нэр</span>
           <input
