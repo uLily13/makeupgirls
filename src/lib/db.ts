@@ -46,7 +46,42 @@ async function ensureTable() {
        CONSTRAINT single_row CHECK (id = 1)
      )`
   );
+  // Uploaded images live in their own table (bytea) so the store document
+  // stays small; products only store the /api/image/<id> URL.
+  await pool().query(
+    `CREATE TABLE IF NOT EXISTS assets (
+       id TEXT PRIMARY KEY,
+       mime TEXT NOT NULL,
+       data BYTEA NOT NULL,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+     )`
+  );
   initialised = true;
+}
+
+// -------- Image assets --------
+
+export async function saveAsset(
+  id: string,
+  mime: string,
+  data: Buffer
+): Promise<void> {
+  await ensureTable();
+  await pool().query(
+    "INSERT INTO assets (id, mime, data) VALUES ($1, $2, $3)",
+    [id, mime, data]
+  );
+}
+
+export async function getAsset(
+  id: string
+): Promise<{ mime: string; data: Buffer } | null> {
+  await ensureTable();
+  const res = await pool().query<{ mime: string; data: Buffer }>(
+    "SELECT mime, data FROM assets WHERE id = $1",
+    [id]
+  );
+  return res.rowCount ? res.rows[0] : null;
 }
 
 function adminUser(): User | null {

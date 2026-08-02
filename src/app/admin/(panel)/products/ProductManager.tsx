@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MNT, type Product, type Category, type Subcategory } from "@/lib/products";
+import { ImageUploader, SingleImageUploader } from "@/components/admin/ImageUploader";
 import {
   saveProduct,
   deleteProduct,
@@ -14,7 +15,7 @@ import {
 
 const BADGES = ["", "Шинэ", "Хит", "Хямдрал"] as const;
 
-type FormState = ProductInput & { ingredientsText: string; imagesText: string };
+type FormState = ProductInput & { ingredientsText: string };
 
 const empty = (): FormState => ({
   slug: "",
@@ -27,7 +28,6 @@ const empty = (): FormState => ({
   shade: "#d98f97",
   colors: [{ name: "Өнгө 1", hex: "#d98f97" }],
   images: [],
-  imagesText: "",
   stock: 50,
   usage: "",
   badge: "",
@@ -72,7 +72,6 @@ export function ProductManager({
       shade: p.shade,
       colors: p.colors?.length ? p.colors : [{ name: "Өнгө 1", hex: p.shade }],
       images: p.images ?? [],
-      imagesText: (p.images ?? []).join("\n"),
       stock: p.stock ?? 0,
       usage: p.usage ?? "",
       badge: p.badge ?? "",
@@ -96,10 +95,7 @@ export function ProductManager({
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      images: form.imagesText
-        .split(/[\n,]/)
-        .map((s) => s.trim())
-        .filter(Boolean),
+      images: form.images.filter(Boolean),
       colors: form.colors.filter((c) => c.hex),
     };
     run(async () => {
@@ -317,15 +313,13 @@ export function ProductManager({
                       }}
                       className={inputCls}
                     />
-                    <input
-                      value={col.image ?? ""}
-                      placeholder="Зураг URL (заавал биш)"
-                      onChange={(e) => {
+                    <SingleImageUploader
+                      value={col.image}
+                      onChange={(url) => {
                         const colors = [...form.colors];
-                        colors[i] = { ...col, image: e.target.value };
+                        colors[i] = { ...col, image: url };
                         setForm({ ...form, colors });
                       }}
-                      className={inputCls}
                     />
                     <button
                       type="button"
@@ -473,16 +467,14 @@ export function ProductManager({
                 className={`${inputCls} resize-none`}
               />
             </Field>
-            <Field label="Зургийн URL-ууд (мөр бүрт нэг)" full>
-              <textarea
-                rows={2}
-                value={form.imagesText}
-                onChange={(e) =>
-                  setForm({ ...form, imagesText: e.target.value })
-                }
-                placeholder="https://... (хоосон бол дизайн placeholder харагдана)"
-                className={`${inputCls} resize-none`}
+            <Field label="Зураг (файл оруулах)" full>
+              <ImageUploader
+                values={form.images}
+                onChange={(images) => setForm({ ...form, images })}
               />
+              <span className="mt-1 text-xs text-muted">
+                Хоосон бол дизайн placeholder харагдана.
+              </span>
             </Field>
           </div>
           <div className="mt-6 flex justify-end gap-2">
