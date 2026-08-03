@@ -12,6 +12,7 @@ export const seedContent: Omit<ContentItem, "history">[] = [
   { key: "announce.4", group: "Зарлалын мөр", label: "Мессеж 4", value: "100% жинхэнэ бүтээгдэхүүн" },
 
   // Hero
+  { key: "hero.image", group: "Нүүр — Hero", label: "Дэлгэц дүүрэн зураг (заавал биш — тавибал баннер болно)", value: "", image: true },
   { key: "hero.badge", group: "Нүүр — Hero", label: "Тэмдэг", value: "Шинэ улирлын цуглуулга" },
   { key: "hero.title", group: "Нүүр — Hero", label: "Гарчиг (мөр 1)", value: "Чиний гоо сайхан," },
   { key: "hero.titleAccent", group: "Нүүр — Hero", label: "Гарчиг (мөр 2, өнгөт)", value: "чиний хэл" },
@@ -60,6 +61,16 @@ export const seedContent: Omit<ContentItem, "history">[] = [
   { key: "footer.address", group: "Footer", label: "Хаяг", value: "Улаанбаатар, Монгол" },
   { key: "footer.phone", group: "Footer", label: "Утас", value: "+976 8000 0000" },
   { key: "footer.email", group: "Footer", label: "И-мэйл", value: "hello@makeupgirls.mn" },
+
+  // Trending on social
+  { key: "trending.eyebrow", group: "Нүүр — Trending", label: "Жижиг гарчиг", value: "@makeupgirls" },
+  { key: "trending.title", group: "Нүүр — Trending", label: "Гарчиг", value: "Trending On Social" },
+  { key: "trending.1", group: "Нүүр — Trending", label: "Зураг 1", value: "", image: true },
+  { key: "trending.2", group: "Нүүр — Trending", label: "Зураг 2", value: "", image: true },
+  { key: "trending.3", group: "Нүүр — Trending", label: "Зураг 3", value: "", image: true },
+  { key: "trending.4", group: "Нүүр — Trending", label: "Зураг 4", value: "", image: true },
+  { key: "trending.5", group: "Нүүр — Trending", label: "Зураг 5", value: "", image: true },
+  { key: "trending.6", group: "Нүүр — Trending", label: "Зураг 6", value: "", image: true },
 
   // Social links
   { key: "social.facebook", group: "Сошиал холбоос", label: "Facebook URL", value: "https://facebook.com/makeupgirls.mn" },

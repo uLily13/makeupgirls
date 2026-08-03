@@ -21,21 +21,39 @@ export function ProductCard({ product }: { product: Product }) {
     ? Math.round((1 - product.price / product.oldPrice!) * 100)
     : 0;
   const fav = has(product.slug);
+  const imgs = (
+    product.images?.length
+      ? product.images
+      : (product.colors ?? []).map((c) => c.image).filter(Boolean)
+  ) as string[];
+  const baseImage = imgs[0];
+  const hoverImage = imgs[1];
 
   return (
     <div className="group flex flex-col">
       <Link
         href={`/product/${product.slug}`}
-        className="squish relative block aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-blush shadow-[0_16px_40px_-24px_rgba(125,74,92,0.5)]"
+        className="squish relative block aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-[#f6f4f3] shadow-[0_16px_40px_-24px_rgba(125,74,92,0.5)]"
       >
+        {/* base image */}
         <ProductVisual
           shade={product.shade}
-          image={product.images?.[0]}
+          image={baseImage}
           category={product.category}
-          className={`h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 ${
+          className={`absolute inset-0 h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 ${
             soldOut ? "opacity-60 grayscale" : ""
-          }`}
+          } ${hoverImage ? "group-hover:opacity-0" : ""}`}
         />
+        {/* hover image (crossfade) */}
+        {hoverImage && (
+          <ProductVisual
+            shade={product.shade}
+            image={hoverImage}
+            className={`absolute inset-0 h-full w-full opacity-0 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:opacity-100 ${
+              soldOut ? "opacity-60 grayscale" : ""
+            }`}
+          />
+        )}
 
         {/* badges */}
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1">

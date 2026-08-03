@@ -104,6 +104,7 @@ export type ContentItem = {
   label: string; // human label in admin
   value: string;
   multiline?: boolean;
+  image?: boolean; // value is an image URL → show uploader in admin
   history?: { value: string; at: string }[];
 };
 

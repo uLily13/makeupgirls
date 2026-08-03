@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  /* Base */
-  --background: #fbf6f4;
+  /* Base — clean white so products stand out */
+  --background: #ffffff;
   --surface: #ffffff;
   --foreground: #241d1b;
   --muted: #8f847d;
   --line: #efe7e2;
 
-  /* Brand — soft rose / nude */
-  --blush: #fbeeed;
-  --blush-deep: #f6dcda;
-  --rose: #d98f97;
-  --rose-deep: #c17681;
+  /* Brand — soft coral / rose (#f2b7ac primary) */
+  --blush: #fdeeeb;
+  --blush-deep: #f8d9d2;
+  --rose: #f2b7ac;
+  --rose-deep: #c56a5b;
   --plum: #7d4a5c;
   --gold: #c9a96a;
   --lilac: #cbb6e6;
@@ -215,8 +215,8 @@ input[type="number"] {
 .aurora span {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.55;
+  filter: blur(80px);
+  opacity: 0.14;
   mix-blend-mode: multiply;
   animation: float-blob 18s var(--ease-out-soft) infinite;
 }

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
+import { HeroBanner } from "@/components/HeroBanner";
+import { TrendingSocial } from "@/components/TrendingSocial";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductVisual } from "@/components/ProductVisual";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
@@ -19,7 +21,11 @@ export default async function Home() {
 
   return (
     <>
-      <Hero content={content} />
+      {content["hero.image"] ? (
+        <HeroBanner content={content} />
+      ) : (
+        <Hero content={content} />
+      )}
 
       {/* Category strip */}
       <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
@@ -133,6 +139,9 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* Trending on social */}
+      <TrendingSocial content={content} />
 
       {/* Recently viewed (client, from localStorage) */}
       <RecentlyViewed />

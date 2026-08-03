@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ContentItem } from "@/lib/products";
+import { SingleImageUploader } from "@/components/admin/ImageUploader";
 import { updateContent, restoreContent } from "../actions";
 
 export function ContentManager({ items }: { items: ContentItem[] }) {
@@ -65,35 +66,55 @@ export function ContentManager({ items }: { items: ContentItem[] }) {
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    {it.multiline ? (
-                      <textarea
-                        rows={2}
-                        value={draftOf(it)}
-                        onChange={(e) =>
-                          setDrafts({ ...drafts, [it.key]: e.target.value })
+                  {it.image ? (
+                    <div className="flex items-center gap-3">
+                      {it.value && (
+                        <div className="h-16 w-16 overflow-hidden rounded-lg border border-line">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={it.value} alt="" className="h-full w-full object-cover" />
+                        </div>
+                      )}
+                      <SingleImageUploader
+                        value={it.value || undefined}
+                        onChange={(url) =>
+                          run(() => updateContent(it.key, url ?? ""))
                         }
-                        className={inputCls}
                       />
-                    ) : (
-                      <input
-                        value={draftOf(it)}
-                        onChange={(e) =>
-                          setDrafts({ ...drafts, [it.key]: e.target.value })
+                      <span className="text-xs text-muted">
+                        {it.value ? "Зураг солих / устгах" : "Зураг оруулах"}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      {it.multiline ? (
+                        <textarea
+                          rows={2}
+                          value={draftOf(it)}
+                          onChange={(e) =>
+                            setDrafts({ ...drafts, [it.key]: e.target.value })
+                          }
+                          className={inputCls}
+                        />
+                      ) : (
+                        <input
+                          value={draftOf(it)}
+                          onChange={(e) =>
+                            setDrafts({ ...drafts, [it.key]: e.target.value })
+                          }
+                          className={inputCls}
+                        />
+                      )}
+                      <button
+                        disabled={pending || !dirty(it)}
+                        onClick={() =>
+                          run(() => updateContent(it.key, draftOf(it)))
                         }
-                        className={inputCls}
-                      />
-                    )}
-                    <button
-                      disabled={pending || !dirty(it)}
-                      onClick={() =>
-                        run(() => updateContent(it.key, draftOf(it)))
-                      }
-                      className="shrink-0 rounded-xl bg-foreground px-5 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-30 sm:self-start"
-                    >
-                      Хадгалах
-                    </button>
-                  </div>
+                        className="shrink-0 rounded-xl bg-foreground px-5 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-30 sm:self-start"
+                      >
+                        Хадгалах
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
