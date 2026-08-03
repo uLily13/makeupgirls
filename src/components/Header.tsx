@@ -69,11 +69,11 @@ export function Header({
         </div>
       </div>
 
-      {/* Floating glass nav */}
-      <div className="sticky top-3 z-40 px-3 lg:top-4 lg:px-6">
+      {/* Full-width coral nav bar */}
+      <div className="sticky top-0 z-40">
         <header
-          className={`glass glass-rim mx-auto flex max-w-6xl items-center justify-between rounded-full px-4 py-2.5 transition-all duration-500 lg:px-6 ${
-            scrolled ? "shadow-[0_16px_40px_-16px_rgba(125,74,92,0.45)]" : ""
+          className={`flex w-full items-center justify-between bg-rose px-5 py-3.5 text-foreground transition-shadow duration-500 lg:px-8 ${
+            scrolled ? "shadow-[0_16px_40px_-16px_rgba(125,74,92,0.55)]" : ""
           }`}
         >
           {/* Left nav (desktop) with hover dropdowns */}
@@ -85,10 +85,10 @@ export function Header({
                   className="link-underline flex items-center gap-1 py-1 font-medium"
                 >
                   {c.name}
-                  <Chevron className="h-3 w-3 text-muted transition-transform duration-300 group-hover:rotate-180" />
+                  <Chevron className="h-3 w-3 text-foreground/60 transition-transform duration-300 group-hover:rotate-180" />
                 </Link>
                 {c.subs.length > 0 && (
-                  <div className="invisible absolute left-1/2 top-full z-50 w-60 -translate-x-1/2 translate-y-1 pt-3 opacity-0 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  <div className="invisible absolute left-0 top-full z-50 w-60 translate-y-1 pt-3 opacity-0 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                     <div className="rounded-2xl border border-line bg-surface/98 p-2 shadow-[0_24px_50px_-16px_rgba(125,74,92,0.4)] backdrop-blur-xl">
                       {c.subs.map((s) => (
                         <Link

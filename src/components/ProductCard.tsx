@@ -35,24 +35,29 @@ export function ProductCard({ product }: { product: Product }) {
         href={`/product/${product.slug}`}
         className="squish relative block aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-[#f6f4f3] shadow-[0_16px_40px_-24px_rgba(125,74,92,0.5)]"
       >
-        {/* base image */}
-        <ProductVisual
-          shade={product.shade}
-          image={baseImage}
-          category={product.category}
-          className={`absolute inset-0 h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 ${
-            soldOut ? "opacity-60 grayscale" : ""
-          } ${hoverImage ? "group-hover:opacity-0" : ""}`}
-        />
-        {/* hover image (crossfade) */}
-        {hoverImage && (
+        {/* base image — the positioning lives on this plain wrapper so it never
+            fights ProductVisual's own `relative` (both would set `position`). */}
+        <div
+          className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 ${
+            hoverImage ? "group-hover:opacity-0" : ""
+          }`}
+        >
           <ProductVisual
             shade={product.shade}
-            image={hoverImage}
-            className={`absolute inset-0 h-full w-full opacity-0 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:opacity-100 ${
-              soldOut ? "opacity-60 grayscale" : ""
-            }`}
+            image={baseImage}
+            category={product.category}
+            className={`h-full w-full ${soldOut ? "opacity-60 grayscale" : ""}`}
           />
+        </div>
+        {/* hover image (crossfade) */}
+        {hoverImage && (
+          <div className="absolute inset-0 opacity-0 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:opacity-100">
+            <ProductVisual
+              shade={product.shade}
+              image={hoverImage}
+              className={`h-full w-full ${soldOut ? "opacity-60 grayscale" : ""}`}
+            />
+          </div>
         )}
 
         {/* badges */}
