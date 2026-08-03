@@ -297,9 +297,13 @@ export function ProductManager({
                       type="color"
                       value={col.hex}
                       onChange={(e) => {
-                        const colors = [...form.colors];
-                        colors[i] = { ...col, hex: e.target.value };
-                        setForm({ ...form, colors });
+                        const hex = e.target.value;
+                        setForm((f) => {
+                          if (!f) return f;
+                          const colors = [...f.colors];
+                          colors[i] = { ...colors[i], hex };
+                          return { ...f, colors };
+                        });
                       }}
                       className="h-9 w-11 shrink-0 rounded-lg border border-line"
                     />
@@ -307,18 +311,27 @@ export function ProductManager({
                       value={col.name}
                       placeholder="Өнгөний нэр"
                       onChange={(e) => {
-                        const colors = [...form.colors];
-                        colors[i] = { ...col, name: e.target.value };
-                        setForm({ ...form, colors });
+                        const name = e.target.value;
+                        setForm((f) => {
+                          if (!f) return f;
+                          const colors = [...f.colors];
+                          colors[i] = { ...colors[i], name };
+                          return { ...f, colors };
+                        });
                       }}
                       className={inputCls}
                     />
                     <SingleImageUploader
                       value={col.image}
                       onChange={(url) => {
-                        const colors = [...form.colors];
-                        colors[i] = { ...col, image: url };
-                        setForm({ ...form, colors });
+                        // Functional update + latest colors[i] so parallel
+                        // image uploads don't clobber each other's data.
+                        setForm((f) => {
+                          if (!f) return f;
+                          const colors = [...f.colors];
+                          colors[i] = { ...colors[i], image: url };
+                          return { ...f, colors };
+                        });
                       }}
                     />
                     <button

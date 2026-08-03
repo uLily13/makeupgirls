@@ -96,3 +96,14 @@ export async function getCurrentUser(): Promise<SafeUser | null> {
   const user = data.users.find((u) => u.id === uid);
   return user ? toSafeUser(user) : null;
 }
+
+/**
+ * The current *shopper*. Admin sessions are treated as guests on the
+ * storefront so an admin login can't leak into customer orders/accounts.
+ * Test admin + customer in parallel via admin.<host> vs <host> (separate
+ * cookies) or separate browsers.
+ */
+export async function getCustomerUser(): Promise<SafeUser | null> {
+  const user = await getCurrentUser();
+  return user && user.role === "customer" ? user : null;
+}

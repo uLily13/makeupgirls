@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getCurrentUser } from "@/lib/auth";
+import { getCustomerUser } from "@/lib/auth";
 import { getStore } from "@/lib/db";
 import { CartView } from "./CartView";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Сагс — makeupgirls" };
 
 export default async function CartPage() {
-  const user = await getCurrentUser();
+  const user = await getCustomerUser();
   const store = await getStore();
   return (
     <Suspense>

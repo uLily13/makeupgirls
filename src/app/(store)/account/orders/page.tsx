@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
+import { getCustomerUser } from "@/lib/auth";
 import { getStore } from "@/lib/db";
 import { MNT } from "@/lib/products";
 
@@ -12,7 +12,7 @@ const statusColor: Record<string, string> = {
 };
 
 export default async function OrdersPage() {
-  const user = (await getCurrentUser())!;
+  const user = (await getCustomerUser())!;
   const store = await getStore();
   const orders = store.orders
     .filter((o) => o.userId === user.id)

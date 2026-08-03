@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
+import { getCustomerUser } from "@/lib/auth";
 import { getStore } from "@/lib/db";
 import { MNT } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountHome() {
-  const user = (await getCurrentUser())!;
+  const user = (await getCustomerUser())!;
   const store = await getStore();
   const orders = store.orders
     .filter((o) => o.userId === user.id)

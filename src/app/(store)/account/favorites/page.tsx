@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
+import { getCustomerUser } from "@/lib/auth";
 import { getStore, withRatings } from "@/lib/db";
 import { ProductCard } from "@/components/ProductCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function FavoritesPage() {
-  const user = (await getCurrentUser())!;
+  const user = (await getCustomerUser())!;
   const store = await getStore();
   const favs = new Set(user.favorites ?? []);
   const products = withRatings(store).filter((p) => favs.has(p.slug));

@@ -11,7 +11,7 @@ import {
   visibleSubcategories,
   countProductsInSub,
 } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCustomerUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export default async function StoreLayout({
 }) {
   const store = await getStore();
   const content = resolveContent(store);
-  const user = await getCurrentUser();
+  const user = await getCustomerUser();
 
   const menu: MenuCategory[] = visibleCategories(store).map((c) => ({
     slug: c.slug,

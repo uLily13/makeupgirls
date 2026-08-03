@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MNT } from "@/lib/products";
 import { getStore, visibleProducts, withRatings } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCustomerUser } from "@/lib/auth";
 import { ProductCard } from "@/components/ProductCard";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { TrackRecentlyViewed } from "@/components/RecentlyViewed";
@@ -34,7 +34,7 @@ export default async function ProductPage({
   const product = rated.find((p) => p.slug === slug);
   if (!product) notFound();
 
-  const user = await getCurrentUser();
+  const user = await getCustomerUser();
   const category = store.categories.find((c) => c.slug === product.category);
   const reviews = store.reviews.filter((r) => r.productSlug === product.slug);
   const related = rated

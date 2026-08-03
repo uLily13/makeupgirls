@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { getCustomerUser } from "@/lib/auth";
 import { AccountNav } from "@/components/account/AccountNav";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export default async function AccountLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
+  const user = await getCustomerUser();
   if (!user) redirect("/login");
 
   return (
