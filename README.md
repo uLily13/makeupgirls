@@ -13,7 +13,23 @@
 - **Session auth** — scrypt hash + HMAC-гаар гарын үсэгтэй httpOnly cookie
 - **Middleware host-routing** — `admin.*` subdomain → admin панель
 
-## Ажиллуулах (local)
+## Тестерт: нэг командаар ажиллуулах (Docker)
+
+[Docker Desktop](https://www.docker.com/products/docker-desktop/) суулгаад ажиллуулж
+байгаа эсэхээ шалгаад, дараах **нэг командыг** ажлуулна:
+
+```bash
+git clone https://github.com/uLily13/makeupgirls.git && cd makeupgirls && docker compose up --build
+```
+
+Postgres + апп хамт босч, өгөгдөл автоматаар seed хийгдэнэ. Дараа нь нээнэ:
+
+- **Дэлгүүр:** http://localhost:3000
+- **Админ:** http://localhost:3000/admin — `admin@makeupgirls.mn` / `admin1234`
+
+Зогсоохдоо терминал дээр `Ctrl+C`. Дахин цэвэрээс эхлэх бол `docker compose down -v`.
+
+## Ажиллуулах (local, Docker-гүй)
 
 1. **PostgreSQL** суулгаж, DB үүсгэнэ:
    ```bash

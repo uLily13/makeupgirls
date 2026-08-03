@@ -1,0 +1,32 @@
+# One-command local run for testers:  docker compose up --build
+# Then open http://localhost:3000  (admin: http://localhost:3000/admin)
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: makeupgirls
+      POSTGRES_PASSWORD: makeupgirls
+      POSTGRES_DB: makeupgirls
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U makeupgirls"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://makeupgirls:makeupgirls@db:5432/makeupgirls
+      SESSION_SECRET: docker-dev-secret-change-in-production
+      ADMIN_EMAIL: admin@makeupgirls.mn
+      ADMIN_PASSWORD: admin1234
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
