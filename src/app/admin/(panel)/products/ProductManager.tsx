@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MNT, type Product, type Category, type Subcategory } from "@/lib/products";
-import { ImageUploader, SingleImageUploader } from "@/components/admin/ImageUploader";
+import { SingleImageUploader } from "@/components/admin/ImageUploader";
 import {
   saveProduct,
   deleteProduct,
@@ -480,13 +480,45 @@ export function ProductManager({
                 className={`${inputCls} resize-none`}
               />
             </Field>
-            <Field label="Зураг (файл оруулах)" full>
-              <ImageUploader
-                values={form.images}
-                onChange={(images) => setForm({ ...form, images })}
-              />
+            <Field label="Зураг (2 зураг заавал)" full>
+              <div className="flex flex-wrap gap-6">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-medium text-muted">
+                    Үндсэн зураг *
+                  </span>
+                  <SingleImageUploader
+                    size="lg"
+                    value={form.images[0] || undefined}
+                    onChange={(url) =>
+                      setForm((f) => {
+                        if (!f) return f;
+                        const images = [f.images[0] ?? "", f.images[1] ?? ""];
+                        images[0] = url ?? "";
+                        return { ...f, images };
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-medium text-muted">
+                    Hover зураг *
+                  </span>
+                  <SingleImageUploader
+                    size="lg"
+                    value={form.images[1] || undefined}
+                    onChange={(url) =>
+                      setForm((f) => {
+                        if (!f) return f;
+                        const images = [f.images[0] ?? "", f.images[1] ?? ""];
+                        images[1] = url ?? "";
+                        return { ...f, images };
+                      })
+                    }
+                  />
+                </div>
+              </div>
               <span className="mt-1 text-xs text-muted">
-                Хоосон бол дизайн placeholder харагдана.
+                Үндсэн зураг картан дээр, hover зураг хулгана аваачихад харагдана.
               </span>
             </Field>
           </div>
@@ -498,7 +530,14 @@ export function ProductManager({
               Болих
             </button>
             <button
-              disabled={pending || !form.name || !form.slug || form.price <= 0}
+              disabled={
+                pending ||
+                !form.name ||
+                !form.slug ||
+                form.price <= 0 ||
+                !form.images[0] ||
+                !form.images[1]
+              }
               onClick={submit}
               className="rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
             >

@@ -84,12 +84,15 @@ export function ImageUploader({
 export function SingleImageUploader({
   value,
   onChange,
+  size = "sm",
 }: {
   value?: string;
   onChange: (url: string | undefined) => void;
+  size?: "sm" | "lg";
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const dim = size === "lg" ? "h-28 w-28" : "h-9 w-9";
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
@@ -110,21 +113,26 @@ export function SingleImageUploader({
         <button
           type="button"
           onClick={() => onChange(undefined)}
-          className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-line"
+          className={`group relative ${dim} shrink-0 overflow-hidden rounded-xl border border-line`}
           title="Зураг устгах"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt="" className="h-full w-full object-cover" />
+          {size === "lg" && (
+            <span className="absolute inset-0 grid place-items-center bg-black/0 text-xs font-medium text-transparent transition-all group-hover:bg-black/50 group-hover:text-white">
+              Устгах
+            </span>
+          )}
         </button>
       ) : (
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-dashed border-line text-muted hover:border-rose disabled:opacity-50"
+          className={`grid ${dim} shrink-0 place-items-center rounded-xl border border-dashed border-line text-muted hover:border-rose disabled:opacity-50`}
           title="Зураг оруулах"
         >
-          {busy ? "…" : "📷"}
+          {busy ? "…" : size === "lg" ? "＋ Зураг" : "📷"}
         </button>
       )}
       <input
