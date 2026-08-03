@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { NumberInputGuard } from "@/components/NumberInputGuard";
 import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export default async function AdminPanelLayout({
 
   return (
     <div className="mx-auto flex max-w-[1400px] flex-col md:flex-row">
+      <NumberInputGuard />
       {/* Sidebar */}
       <aside className="shrink-0 border-b border-line px-4 py-4 md:min-h-screen md:w-64 md:border-b-0 md:border-r md:px-5 md:py-7">
         <Link href="/admin" className="mb-6 hidden items-baseline gap-2 md:flex">
