@@ -89,10 +89,12 @@ export function PromotionManager({
                   {p.type === "percent" && `${p.value}% хөнгөлөлт`}
                   {p.type === "amount" && `${p.value}₮ хасна`}
                   {p.type === "bogo" && `${p.buyQty} авбал ${p.freeQty} үнэгүй`}
-                  {p.type === "gift" && `${p.minQty}ш авбал "${nameOf(p.giftSlug ?? "")}" бэлэг`}
-                  {p.productSlugs.length > 0
-                    ? ` · ${p.productSlugs.length} бүтээгдэхүүн`
-                    : " · бүх бүтээгдэхүүн"}
+                  {p.type === "gift" &&
+                    `${p.productSlugs.map(nameOf).join(", ")} (${p.minQty}ш) авбал "${nameOf(p.giftSlug ?? "")}" үнэгүй`}
+                  {p.type !== "gift" &&
+                    (p.productSlugs.length > 0
+                      ? ` · ${p.productSlugs.length} бүтээгдэхүүн`
+                      : " · бүх бүтээгдэхүүн")}
                 </div>
               </div>
               <div className="flex gap-1.5">
@@ -143,20 +145,19 @@ export function PromotionManager({
                 </div>
               )}
               {form.type === "gift" && (
-                <div className="grid grid-cols-2 gap-3">
-                  <L label="Доод тоо">
-                    <input type="number" value={form.minQty ?? 1} onChange={(e) => setForm({ ...form, minQty: Number(e.target.value) })} className={inputCls} />
-                  </L>
-                  <L label="Бэлэг бүтээгдэхүүн">
-                    <select value={form.giftSlug ?? ""} onChange={(e) => setForm({ ...form, giftSlug: e.target.value })} className={inputCls}>
-                      <option value="">— сонгох —</option>
-                      {products.map((p) => (<option key={p.slug} value={p.slug}>{p.name}</option>))}
-                    </select>
-                  </L>
+                <div className="rounded-xl bg-blush/40 p-3 text-xs text-rose-deep">
+                  🎁 Доорх <b>А бүтээгдэхүүн(үүд)</b>-ийг авбал сонгосон{" "}
+                  <b>B бүтээгдэхүүн</b> үнэгүй дагалдана.
                 </div>
               )}
 
-              <L label="Хамрах бүтээгдэхүүн (хоосон = бүгд)">
+              <L
+                label={
+                  form.type === "gift"
+                    ? "А бүтээгдэхүүн — авбал бэлэг дагана (заавал сонгоно)"
+                    : "Хамрах бүтээгдэхүүн (хоосон = бүх бараа)"
+                }
+              >
                 <div className="max-h-40 space-y-1 overflow-y-auto rounded-xl border border-line p-3">
                   {products.map((p) => (
                     <label key={p.slug} className="flex items-center gap-2 text-sm">
@@ -177,6 +178,20 @@ export function PromotionManager({
                   ))}
                 </div>
               </L>
+
+              {form.type === "gift" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <L label="B бүтээгдэхүүн — үнэгүй дагалдана">
+                    <select value={form.giftSlug ?? ""} onChange={(e) => setForm({ ...form, giftSlug: e.target.value })} className={inputCls}>
+                      <option value="">— сонгох —</option>
+                      {products.map((p) => (<option key={p.slug} value={p.slug}>{p.name}</option>))}
+                    </select>
+                  </L>
+                  <L label="А-г хэдэн авбал">
+                    <input type="number" min={1} value={form.minQty ?? 1} onChange={(e) => setForm({ ...form, minQty: Number(e.target.value) })} className={inputCls} />
+                  </L>
+                </div>
+              )}
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
                 Идэвхтэй
@@ -185,7 +200,12 @@ export function PromotionManager({
             <div className="mt-6 flex justify-end gap-2">
               <button onClick={() => setForm(null)} className="rounded-full border border-line px-5 py-2.5 text-sm">Болих</button>
               <button
-                disabled={pending || !form.title}
+                disabled={
+                  pending ||
+                  !form.title ||
+                  (form.type === "gift" &&
+                    (form.productSlugs.length === 0 || !form.giftSlug))
+                }
                 onClick={() => run(async () => { await savePromotion(form); setForm(null); })}
                 className="rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
               >

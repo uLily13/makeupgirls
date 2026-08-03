@@ -55,10 +55,15 @@ export function applyPromotions(
       }
       if (applied) labels.push(promo.title);
     } else if (promo.type === "gift" && promo.giftSlug) {
+      // "Buy A → get B free": A = productSlugs (required), B = giftSlug.
+      if (promo.productSlugs.length === 0) continue;
       const min = promo.minQty ?? 1;
-      const qty = inScope.reduce((n, l) => n + l.qty, 0);
-      if (qty >= min) {
-        freeItems.push({ slug: promo.giftSlug, qty: 1, from: promo.title });
+      const buyers = lines.filter((l) => promo.productSlugs.includes(l.slug));
+      const qtyA = buyers.reduce((n, l) => n + l.qty, 0);
+      if (qtyA >= min) {
+        // one B per qualifying set of A
+        const sets = Math.floor(qtyA / min);
+        freeItems.push({ slug: promo.giftSlug, qty: sets, from: promo.title });
         labels.push(promo.title);
       }
     }
