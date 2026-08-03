@@ -89,7 +89,7 @@ export function Header({
                 </Link>
                 {c.subs.length > 0 && (
                   <div className="invisible absolute left-1/2 top-full z-50 w-60 -translate-x-1/2 translate-y-1 pt-3 opacity-0 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                    <div className="glass glass-rim rounded-2xl p-2">
+                    <div className="rounded-2xl border border-line bg-surface/98 p-2 shadow-[0_24px_50px_-16px_rgba(125,74,92,0.4)] backdrop-blur-xl">
                       {c.subs.map((s) => (
                         <Link
                           key={s.slug}
