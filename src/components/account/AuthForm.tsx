@@ -1,16 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { login, register } from "@/app/(store)/account/actions";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next") || "/account";
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", phone: "", password: "" });
   const isLogin = mode === "login";
+  const withNext = (path: string) =>
+    next !== "/account" ? `${path}?next=${encodeURIComponent(next)}` : path;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +24,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         ? await login({ phone: form.phone, password: form.password })
         : await register(form);
       if (res.ok) {
-        router.push("/account");
+        router.push(next);
         router.refresh();
       } else {
         setError(res.error ?? "Алдаа гарлаа.");
@@ -98,14 +102,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           {isLogin ? (
             <>
               Бүртгэлгүй юу?{" "}
-              <Link href="/register" className="font-medium text-rose-deep hover:underline">
+              <Link href={withNext("/register")} className="font-medium text-rose-deep hover:underline">
                 Бүртгүүлэх
               </Link>
             </>
           ) : (
             <>
               Бүртгэлтэй юу?{" "}
-              <Link href="/login" className="font-medium text-rose-deep hover:underline">
+              <Link href={withNext("/login")} className="font-medium text-rose-deep hover:underline">
                 Нэвтрэх
               </Link>
             </>

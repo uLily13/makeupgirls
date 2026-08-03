@@ -1,12 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 import { useCart } from "@/lib/cart";
 import { MNT, type Address, type Promotion } from "@/lib/products";
 import { applyPromotions } from "@/lib/promotions";
-import { placeOrder } from "@/app/(store)/account/actions";
+import { placeOrder, saveAddress } from "@/app/(store)/account/actions";
+
+const emptyAddr = () => ({
+  label: "Гэр",
+  recipient: "",
+  phone: "",
+  city: "Улаанбаатар",
+  district: "",
+  khoroo: "",
+  detail: "",
+});
 
 export function CartView({
   user,
@@ -20,14 +30,45 @@ export function CartView({
   products: { slug: string; name: string; price: number }[];
 }) {
   const router = useRouter();
+  const params = useSearchParams();
   const { items, subtotal, setQty, remove, clear } = useCart();
   const [pending, startTransition] = useTransition();
   const [checkout, setCheckout] = useState(false);
   const [addrId, setAddrId] = useState(
     addresses.find((a) => a.isDefault)?.id ?? addresses[0]?.id ?? ""
   );
+  const [showAddrForm, setShowAddrForm] = useState(addresses.length === 0);
+  const [addrForm, setAddrForm] = useState(emptyAddr());
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  // Auto-open checkout when returning from login (?checkout=1).
+  useEffect(() => {
+    if (params.get("checkout") === "1" && user && items.length > 0)
+      setCheckout(true);
+  }, [params, user, items.length]);
+
+  // Keep a valid selected address as the list changes.
+  useEffect(() => {
+    if (addresses.length === 0) {
+      setShowAddrForm(true);
+      return;
+    }
+    setShowAddrForm(false);
+    if (!addresses.some((a) => a.id === addrId)) {
+      setAddrId(addresses.find((a) => a.isDefault)?.id ?? addresses[0].id);
+    }
+  }, [addresses, addrId]);
+
+  const saveNewAddress = () =>
+    startTransition(async () => {
+      setError("");
+      const res = await saveAddress({ ...addrForm, isDefault: true });
+      if (res.ok) {
+        setAddrForm(emptyAddr());
+        router.refresh(); // addresses prop updates → form hides, radio shows
+      } else setError(res.error ?? "Алдаа гарлаа.");
+    });
 
   const promo = applyPromotions(
     items.map((i) => ({ slug: i.slug, qty: i.qty, price: i.price })),
@@ -172,12 +213,20 @@ export function CartView({
 
           {!user ? (
             <div className="mt-6 space-y-2">
-              <Link href="/login" className="btn-liquid block bg-foreground py-3.5 text-center text-sm font-medium text-white">
+              <Link
+                href={`/login?next=${encodeURIComponent("/cart?checkout=1")}`}
+                className="btn-liquid block bg-foreground py-3.5 text-center text-sm font-medium text-white"
+              >
                 Нэвтэрч захиалах
               </Link>
               <p className="text-center text-xs text-muted">
                 Бүртгэлгүй юу?{" "}
-                <Link href="/register" className="text-rose-deep underline">Бүртгүүлэх</Link>
+                <Link
+                  href={`/register?next=${encodeURIComponent("/cart?checkout=1")}`}
+                  className="text-rose-deep underline"
+                >
+                  Бүртгүүлэх
+                </Link>
               </p>
             </div>
           ) : (
@@ -203,17 +252,56 @@ export function CartView({
           <div className="glass relative my-8 w-full max-w-md rounded-3xl p-6 md:p-8">
             <h3 className="font-display text-2xl">Захиалга баталгаажуулах</h3>
 
-            {addresses.length === 0 ? (
-              <div className="mt-5 rounded-xl bg-white/60 p-4 text-sm">
-                <p className="text-muted">Хүргэлтийн хаяг алга байна.</p>
-                <Link href="/account/addresses" className="mt-2 inline-block font-medium text-rose-deep underline">
-                  Хаяг нэмэх →
-                </Link>
+            {showAddrForm ? (
+              /* ---- Inline delivery-address form (no saved address yet) ---- */
+              <div className="mt-4">
+                <p className="mb-3 text-sm text-muted">
+                  {addresses.length === 0
+                    ? "Хүргэлтийн хаягаа оруулна уу"
+                    : "Шинэ хаяг оруулна уу"}
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <AF label="Хүлээн авагч" full value={addrForm.recipient} onChange={(v) => setAddrForm({ ...addrForm, recipient: v })} />
+                  <AF label="Утас" full value={addrForm.phone} onChange={(v) => setAddrForm({ ...addrForm, phone: v })} placeholder="99xxxxxx" />
+                  <AF label="Хот / аймаг" value={addrForm.city} onChange={(v) => setAddrForm({ ...addrForm, city: v })} />
+                  <AF label="Дүүрэг / сум" value={addrForm.district} onChange={(v) => setAddrForm({ ...addrForm, district: v })} />
+                  <AF label="Хороо / баг" value={addrForm.khoroo} onChange={(v) => setAddrForm({ ...addrForm, khoroo: v })} />
+                  <AF label="Байр, тоот" value={addrForm.detail} onChange={(v) => setAddrForm({ ...addrForm, detail: v })} />
+                </div>
+                {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+                <div className="mt-5 flex justify-end gap-2">
+                  <button
+                    onClick={() =>
+                      addresses.length === 0 ? setCheckout(false) : setShowAddrForm(false)
+                    }
+                    className="rounded-full border border-line bg-white/60 px-5 py-2.5 text-sm"
+                  >
+                    Болих
+                  </button>
+                  <button
+                    onClick={saveNewAddress}
+                    disabled={pending || !addrForm.recipient || !addrForm.phone || !addrForm.district}
+                    className="rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                  >
+                    {pending ? "Хадгалж байна…" : "Хадгалаад үргэлжлүүлэх"}
+                  </button>
+                </div>
               </div>
             ) : (
               <>
-                <p className="mt-1 text-sm text-muted">Хүргэлтийн хаягаа сонгоно уу</p>
-                <div className="mt-4 space-y-2">
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="text-sm text-muted">Хүргэлтийн хаягаа сонгоно уу</p>
+                  <button
+                    onClick={() => {
+                      setAddrForm(emptyAddr());
+                      setShowAddrForm(true);
+                    }}
+                    className="text-xs font-medium text-rose-deep hover:underline"
+                  >
+                    + Шинэ хаяг
+                  </button>
+                </div>
+                <div className="mt-3 space-y-2">
                   {addresses.map((a) => (
                     <label
                       key={a.id}
@@ -273,5 +361,31 @@ function Row({ label, value, rose }: { label: string; value: string; rose?: bool
       <span className="text-muted">{label}</span>
       <span className={`font-medium ${rose ? "text-rose-deep" : ""}`}>{value}</span>
     </div>
+  );
+}
+
+function AF({
+  label,
+  value,
+  onChange,
+  full,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  full?: boolean;
+  placeholder?: string;
+}) {
+  return (
+    <label className={`flex flex-col gap-1 ${full ? "col-span-2" : ""}`}>
+      <span className="text-[11px] font-medium text-muted">{label}</span>
+      <input
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-line bg-white/70 px-3 py-2 text-sm focus:border-rose focus:outline-none"
+      />
+    </label>
   );
 }

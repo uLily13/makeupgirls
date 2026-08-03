@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { AuthForm } from "@/components/account/AuthForm";
@@ -7,5 +8,9 @@ export const metadata = { title: "Бүртгүүлэх — makeupgirls" };
 
 export default async function RegisterPage() {
   if (await getCurrentUser()) redirect("/account");
-  return <AuthForm mode="register" />;
+  return (
+    <Suspense>
+      <AuthForm mode="register" />
+    </Suspense>
+  );
 }
