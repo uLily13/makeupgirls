@@ -2,35 +2,34 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import type { HeroSlide } from "@/lib/products";
 
-type Slide = {
-  image: string;
-  badge: string;
-  title: string;
-  accent: string;
-  subtitle: string;
-};
-
-// Full-bleed hero carousel. Slide 1 uses the hero.* keys; optional slides 2–3
-// use hero.2.* / hero.3.* and only appear when they have a title or image.
-// Slides auto-advance and slide sideways; arrows + dots allow manual control.
-export function HeroBanner({ content }: { content: Record<string, string> }) {
-  const c = (k: string, fallback = "") => content[k] ?? fallback;
-
-  const raw: Slide[] = [
-    { image: c("hero.image"), badge: c("hero.badge"), title: c("hero.title"), accent: c("hero.titleAccent"), subtitle: c("hero.subtitle") },
-    { image: c("hero.2.image"), badge: c("hero.2.badge"), title: c("hero.2.title"), accent: c("hero.2.titleAccent"), subtitle: c("hero.2.subtitle") },
-    { image: c("hero.3.image"), badge: c("hero.3.badge"), title: c("hero.3.title"), accent: c("hero.3.titleAccent"), subtitle: c("hero.3.subtitle") },
-  ];
-  const slides = raw.filter((s, i) => i === 0 || s.image || s.title);
-  const n = slides.length;
-  const cta1 = c("hero.cta1");
-  const cta2 = c("hero.cta2");
+// Full-bleed hero carousel driven by a dynamic list of slides (managed in the
+// admin "Hero баннер" section). Slides auto-advance and slide sideways; arrows
+// and dots allow manual control. A slide with no image shows a coral gradient.
+export function HeroBanner({
+  slides,
+  cta1,
+  cta2,
+}: {
+  slides: HeroSlide[];
+  cta1: string;
+  cta2: string;
+}) {
+  const fallback: HeroSlide = {
+    id: "fallback",
+    image: "",
+    badge: "Шинэ улирлын цуглуулга",
+    title: "Чиний гоо сайхан,",
+    titleAccent: "чиний хэл",
+    subtitle: "Гоо сайхны бүтээгдэхүүнийг нэг дороос.",
+  };
+  const list = slides.length ? slides : [fallback];
+  const n = list.length;
 
   const [idx, setIdx] = useState(0);
   const active = idx % n;
 
-  // Auto-advance.
   useEffect(() => {
     if (n <= 1) return;
     const t = setInterval(() => setIdx((v) => (v + 1) % n), 6000);
@@ -47,8 +46,8 @@ export function HeroBanner({ content }: { content: Record<string, string> }) {
           className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{ transform: `translateX(-${active * 100}%)` }}
         >
-          {slides.map((s, i) => (
-            <div key={i} className="relative h-full w-full shrink-0">
+          {list.map((s) => (
+            <div key={s.id} className="relative h-full w-full shrink-0">
               {s.image ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -74,12 +73,14 @@ export function HeroBanner({ content }: { content: Record<string, string> }) {
                       ✦ {s.badge}
                     </span>
                   )}
-                  <h1 className="max-w-xl font-display text-4xl leading-[1.05] drop-shadow-sm md:text-6xl lg:text-7xl">
-                    {s.title}{" "}
-                    <span className={s.image ? "text-blush-deep" : "text-rose-deep"}>
-                      {s.accent}
-                    </span>
-                  </h1>
+                  {(s.title || s.titleAccent) && (
+                    <h1 className="max-w-xl font-display text-4xl leading-[1.05] drop-shadow-sm md:text-6xl lg:text-7xl">
+                      {s.title}{" "}
+                      <span className={s.image ? "text-blush-deep" : "text-rose-deep"}>
+                        {s.titleAccent}
+                      </span>
+                    </h1>
+                  )}
                   {s.subtitle && (
                     <p
                       className={`max-w-md text-sm leading-relaxed md:text-[15px] ${
@@ -135,9 +136,9 @@ export function HeroBanner({ content }: { content: Record<string, string> }) {
               </svg>
             </button>
             <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-              {slides.map((_, i) => (
+              {list.map((s, i) => (
                 <button
-                  key={i}
+                  key={s.id}
                   onClick={() => go(i)}
                   aria-label={`Слайд ${i + 1}`}
                   className={`h-2 rounded-full transition-all duration-300 ${

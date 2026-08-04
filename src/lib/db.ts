@@ -121,6 +121,28 @@ function normaliseProduct(p: (typeof seedProducts)[number]) {
   };
 }
 
+function defaultHeroSlides() {
+  return [
+    {
+      id: randomUUID(),
+      image: "",
+      badge: "Шинэ улирлын цуглуулга",
+      title: "Чиний гоо сайхан,",
+      titleAccent: "чиний хэл",
+      subtitle:
+        "Солонгос болон дэлхийн шилдэг брэндүүдийн гоо сайхны бүтээгдэхүүнийг нэг дороос. Цэвэрхэн, орчин үеийн, чамд зориулсан.",
+    },
+  ];
+}
+
+// Hero content keys that were replaced by the dynamic `heroSlides` array.
+const OBSOLETE_HERO_KEYS = new Set([
+  "hero.image", "hero.badge", "hero.title", "hero.titleAccent", "hero.subtitle",
+  "hero.stat1v", "hero.stat1l", "hero.stat2v", "hero.stat2l", "hero.stat3v", "hero.stat3l",
+  "hero.2.image", "hero.2.badge", "hero.2.title", "hero.2.titleAccent", "hero.2.subtitle",
+  "hero.3.image", "hero.3.badge", "hero.3.title", "hero.3.titleAccent", "hero.3.subtitle",
+]);
+
 function buildSeed(): Store {
   const admin = adminUser();
   return {
@@ -134,6 +156,7 @@ function buildSeed(): Store {
     promotions: [],
     feedback: [],
     subscribers: [],
+    heroSlides: defaultHeroSlides(),
     updatedAt: new Date().toISOString(),
   };
 }
@@ -164,6 +187,35 @@ export async function getStore(): Promise<Store> {
   if (!store.promotions) { store.promotions = []; changed = true; }
   if (!store.feedback) { store.feedback = []; changed = true; }
   if (!store.subscribers) { store.subscribers = []; changed = true; }
+
+  // Migrate the old fixed hero content keys into the dynamic heroSlides array.
+  if (!store.heroSlides) {
+    const cmap: Record<string, string> = {};
+    for (const c of store.content) cmap[c.key] = c.value;
+    const mk = (p: string) => ({
+      id: randomUUID(),
+      image: cmap[`${p}image`] ?? "",
+      badge: cmap[`${p}badge`] ?? "",
+      title: cmap[`${p}title`] ?? "",
+      titleAccent: cmap[`${p}titleAccent`] ?? "",
+      subtitle: cmap[`${p}subtitle`] ?? "",
+    });
+    const s1 = mk("hero.");
+    if (!s1.image && !s1.title) {
+      Object.assign(s1, defaultHeroSlides()[0], { id: s1.id });
+    }
+    const s2 = mk("hero.2.");
+    const s3 = mk("hero.3.");
+    const slides = [s1];
+    if (s2.image || s2.title) slides.push(s2);
+    if (s3.image || s3.title) slides.push(s3);
+    store.heroSlides = slides;
+    changed = true;
+  }
+  // Drop obsolete hero content keys (replaced by heroSlides).
+  const beforeLen = store.content.length;
+  store.content = store.content.filter((c) => !OBSOLETE_HERO_KEYS.has(c.key));
+  if (store.content.length !== beforeLen) changed = true;
   for (const u of store.users) {
     if (!u.favorites) {
       u.favorites = [];

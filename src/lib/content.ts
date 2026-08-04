@@ -11,34 +11,9 @@ export const seedContent: Omit<ContentItem, "history">[] = [
   { key: "announce.3", group: "Зарлалын мөр", label: "Мессеж 3", value: "Шинэ хэрэглэгчид -10% хямдрал" },
   { key: "announce.4", group: "Зарлалын мөр", label: "Мессеж 4", value: "100% жинхэнэ бүтээгдэхүүн" },
 
-  // Hero
-  { key: "hero.image", group: "Нүүр — Hero", label: "Дэлгэц дүүрэн зураг (заавал биш — тавибал баннер болно)", value: "", image: true },
-  { key: "hero.badge", group: "Нүүр — Hero", label: "Тэмдэг", value: "Шинэ улирлын цуглуулга" },
-  { key: "hero.title", group: "Нүүр — Hero", label: "Гарчиг (мөр 1)", value: "Чиний гоо сайхан," },
-  { key: "hero.titleAccent", group: "Нүүр — Hero", label: "Гарчиг (мөр 2, өнгөт)", value: "чиний хэл" },
-  { key: "hero.subtitle", group: "Нүүр — Hero", label: "Тайлбар", value: "Солонгос болон дэлхийн шилдэг брэндүүдийн гоо сайхны бүтээгдэхүүнийг нэг дороос. Цэвэрхэн, орчин үеийн, чамд зориулсан.", multiline: true },
+  // Hero — слайдуудыг «Hero баннер» админ хэсгээс удирдана. Энд зөвхөн товчнууд.
   { key: "hero.cta1", group: "Нүүр — Hero", label: "Товч 1", value: "Одоо худалдаж авах" },
   { key: "hero.cta2", group: "Нүүр — Hero", label: "Товч 2", value: "Багц үзэх" },
-  { key: "hero.stat1v", group: "Нүүр — Hero", label: "Статистик 1 — тоо", value: "500+" },
-  { key: "hero.stat1l", group: "Нүүр — Hero", label: "Статистик 1 — нэр", value: "Бүтээгдэхүүн" },
-  { key: "hero.stat2v", group: "Нүүр — Hero", label: "Статистик 2 — тоо", value: "12k+" },
-  { key: "hero.stat2l", group: "Нүүр — Hero", label: "Статистик 2 — нэр", value: "Хэрэглэгч" },
-  { key: "hero.stat3v", group: "Нүүр — Hero", label: "Статистик 3 — тоо", value: "4.9★" },
-  { key: "hero.stat3l", group: "Нүүр — Hero", label: "Статистик 3 — нэр", value: "Үнэлгээ" },
-
-  // Hero — 2-р слайд (заавал биш. Гарчиг эсвэл зураг тавибал слайд нэмэгдэнэ)
-  { key: "hero.2.image", group: "Нүүр — Hero (2-р слайд)", label: "Зураг", value: "", image: true },
-  { key: "hero.2.badge", group: "Нүүр — Hero (2-р слайд)", label: "Тэмдэг", value: "" },
-  { key: "hero.2.title", group: "Нүүр — Hero (2-р слайд)", label: "Гарчиг (мөр 1)", value: "" },
-  { key: "hero.2.titleAccent", group: "Нүүр — Hero (2-р слайд)", label: "Гарчиг (мөр 2, өнгөт)", value: "" },
-  { key: "hero.2.subtitle", group: "Нүүр — Hero (2-р слайд)", label: "Тайлбар", value: "", multiline: true },
-
-  // Hero — 3-р слайд (заавал биш)
-  { key: "hero.3.image", group: "Нүүр — Hero (3-р слайд)", label: "Зураг", value: "", image: true },
-  { key: "hero.3.badge", group: "Нүүр — Hero (3-р слайд)", label: "Тэмдэг", value: "" },
-  { key: "hero.3.title", group: "Нүүр — Hero (3-р слайд)", label: "Гарчиг (мөр 1)", value: "" },
-  { key: "hero.3.titleAccent", group: "Нүүр — Hero (3-р слайд)", label: "Гарчиг (мөр 2, өнгөт)", value: "" },
-  { key: "hero.3.subtitle", group: "Нүүр — Hero (3-р слайд)", label: "Тайлбар", value: "", multiline: true },
 
   // Home sections
   { key: "home.faves.eyebrow", group: "Нүүр — Хэсгүүд", label: "Онцлох — жижиг гарчиг", value: "Онцлох" },

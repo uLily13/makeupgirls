@@ -24,7 +24,11 @@ export default async function Home() {
   return (
     <>
       {/* Large full-bleed hero carousel */}
-      <HeroBanner content={content} />
+      <HeroBanner
+        slides={store.heroSlides ?? []}
+        cta1={c("hero.cta1", "Одоо худалдаж авах")}
+        cta2={c("hero.cta2", "Багц үзэх")}
+      />
 
       {/* Faves — best sellers & bundles as tabs */}
       <SectionBand bg={c("home.faves.bg")}>

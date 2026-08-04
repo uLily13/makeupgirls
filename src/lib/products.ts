@@ -99,6 +99,17 @@ export type Feedback = {
   handled?: boolean;
 };
 
+// -------- Hero banner slides (dynamic carousel) --------
+
+export type HeroSlide = {
+  id: string;
+  image: string; // full-bleed banner image (empty = coral gradient)
+  badge: string;
+  title: string;
+  titleAccent: string; // coloured second part of the title
+  subtitle: string;
+};
+
 // -------- Newsletter subscribers --------
 
 export type Subscriber = {
@@ -191,6 +202,7 @@ export type Store = {
   promotions: Promotion[];
   feedback: Feedback[];
   subscribers: Subscriber[];
+  heroSlides: HeroSlide[];
   updatedAt: string;
 };
 

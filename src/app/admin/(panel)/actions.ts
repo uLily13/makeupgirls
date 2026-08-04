@@ -10,6 +10,7 @@ import type {
   ColorVariant,
   Promotion,
   OrderStatus,
+  HeroSlide,
 } from "@/lib/products";
 
 // NOTE: These are public POST endpoints. Before production, gate every action
@@ -315,6 +316,25 @@ export async function toggleFeedbackHandled(id: string) {
 export async function deleteFeedback(id: string) {
   const store = await getStore();
   store.feedback = store.feedback.filter((f) => f.id !== id);
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ HERO BANNER ============================
+
+export async function saveHeroSlides(slides: HeroSlide[]) {
+  const store = await getStore();
+  store.heroSlides = slides
+    .map((s) => ({
+      id: s.id || randomUUID(),
+      image: s.image ?? "",
+      badge: (s.badge ?? "").trim(),
+      title: (s.title ?? "").trim(),
+      titleAccent: (s.titleAccent ?? "").trim(),
+      subtitle: (s.subtitle ?? "").trim(),
+    }))
+    // Drop fully-empty slides (no image and no text).
+    .filter((s) => s.image || s.title || s.titleAccent || s.subtitle || s.badge);
   await saveStore(store);
   refresh();
 }
