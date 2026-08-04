@@ -58,10 +58,22 @@ export function Footer({
               <li>{c("footer.address")}</li>
               <li>{c("footer.phone")}</li>
               <li>{c("footer.email")}</li>
-              <li className="flex gap-3 pt-2">
-                {c("social.instagram") && <Social href={c("social.instagram")}>Instagram</Social>}
-                {c("social.facebook") && <Social href={c("social.facebook")}>Facebook</Social>}
-                {c("social.tiktok") && <Social href={c("social.tiktok")}>TikTok</Social>}
+              <li className="flex gap-2.5 pt-2">
+                {c("social.instagram") && (
+                  <Social href={c("social.instagram")} label="Instagram">
+                    <InstagramIcon />
+                  </Social>
+                )}
+                {c("social.facebook") && (
+                  <Social href={c("social.facebook")} label="Facebook">
+                    <FacebookIcon />
+                  </Social>
+                )}
+                {c("social.tiktok") && (
+                  <Social href={c("social.tiktok")} label="TikTok">
+                    <TikTokIcon />
+                  </Social>
+                )}
               </li>
             </ul>
           </div>
@@ -79,15 +91,51 @@ export function Footer({
   );
 }
 
-function Social({ href, children }: { href: string; children: React.ReactNode }) {
+function Social({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-foreground/70 hover:text-rose"
+      aria-label={label}
+      title={label}
+      className="grid h-9 w-9 place-items-center rounded-full border border-line text-foreground/70 transition-colors hover:border-rose hover:bg-rose hover:text-white"
     >
       {children}
     </a>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.56-1.5H17V3.6c-.29-.04-1.27-.13-2.4-.13-2.38 0-4 1.45-4 4.12v2.3H8v3.1h2.6V21h2.9z" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.6 3c.35 2.02 1.6 3.4 3.4 3.57v2.62c-1.1.02-2.28-.38-3.28-1.06v6.16c0 3.16-2.42 5.21-5.14 5.21-2.72 0-4.98-2.02-4.98-4.79 0-2.86 2.32-4.86 5.05-4.6v2.7c-.32-.1-.66-.16-1-.16-1.2 0-2.2.94-2.2 2.16 0 1.22 1 2.16 2.24 2.16 1.28 0 2.3-1.02 2.3-2.5V3h3.61z" />
+    </svg>
   );
 }
