@@ -13,6 +13,7 @@ const links = [
   { href: "/admin/menu", label: "Цэс / Ангилал", icon: "☰" },
   { href: "/admin/content", label: "Текст контент", icon: "✎" },
   { href: "/admin/feedback", label: "Санал хүсэлт", icon: "✉" },
+  { href: "/admin/subscribers", label: "Имэйл бүртгэл", icon: "@" },
   { href: "/admin/reports", label: "Тайлан", icon: "◷" },
 ];
 

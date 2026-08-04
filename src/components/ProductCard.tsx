@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { MNT, type Product } from "@/lib/products";
 import { ProductVisual } from "./ProductVisual";
-import { useCart } from "@/lib/cart";
 import { useFavorites } from "@/lib/favorites";
+import { useQuickView } from "@/lib/quickview";
 
 const badgeStyle: Record<string, string> = {
   Шинэ: "text-foreground",
@@ -13,7 +13,7 @@ const badgeStyle: Record<string, string> = {
 };
 
 export function ProductCard({ product }: { product: Product }) {
-  const { add } = useCart();
+  const { open: openQuickView } = useQuickView();
   const { has, toggle } = useFavorites();
   const soldOut = product.stock <= 0;
   const onSale = product.oldPrice && product.oldPrice > product.price;
@@ -64,7 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1">
           {product.badge && (
             <span
-              className={`glass glass-rim rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
+              className={`rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-[0_6px_16px_-8px_rgba(125,74,92,0.5)] ${
                 badgeStyle[product.badge]
               }`}
             >
@@ -90,30 +90,26 @@ export function ProductCard({ product }: { product: Product }) {
             toggle(product.slug);
           }}
           aria-label="Хадгалах"
-          className="glass glass-rim absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full"
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/95 shadow-[0_6px_16px_-8px_rgba(125,74,92,0.5)] transition-colors hover:bg-white"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill={fav ? "var(--rose-deep)" : "none"}>
             <path d="M12 20s-7-4.5-9.5-9A4.5 4.5 0 0112 5a4.5 4.5 0 019.5 6c-2.5 4.5-9.5 9-9.5 9z" stroke={fav ? "var(--rose-deep)" : "currentColor"} strokeWidth="1.6" strokeLinejoin="round" />
           </svg>
         </button>
 
-        {!soldOut && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              add({
-                slug: product.slug,
-                name: product.name,
-                brand: product.brand,
-                price: product.price,
-                shade: product.colors?.[0]?.hex ?? product.shade,
-              });
-            }}
-            className="btn-liquid glass glass-rim absolute inset-x-3 bottom-3 translate-y-3 py-2.5 text-sm font-medium text-foreground opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100"
-          >
-            Сагслах
-          </button>
-        )}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            openQuickView(product);
+          }}
+          className="btn-liquid absolute inset-x-3 bottom-3 flex translate-y-3 items-center justify-center gap-1.5 bg-white/95 py-2.5 text-sm font-medium text-foreground opacity-0 shadow-[0_10px_28px_-14px_rgba(125,74,92,0.7)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white group-hover:translate-y-0 group-hover:opacity-100"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+            <circle cx="12" cy="12" r="2.6" stroke="currentColor" strokeWidth="1.6" />
+          </svg>
+          Харах
+        </button>
       </Link>
 
       <div className="mt-3.5 flex flex-col gap-1">

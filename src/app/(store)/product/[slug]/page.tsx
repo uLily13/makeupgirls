@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MNT } from "@/lib/products";
-import { getStore, visibleProducts, withRatings } from "@/lib/db";
+import { getStore, withRatings } from "@/lib/db";
 import { getCustomerUser } from "@/lib/auth";
 import { ProductCard } from "@/components/ProductCard";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -45,7 +45,7 @@ export default async function ProductPage({
     : 0;
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+    <div className="wrap py-8 lg:py-12">
       <TrackRecentlyViewed
         product={{
           slug: product.slug,
@@ -57,6 +57,7 @@ export default async function ProductPage({
         }}
       />
 
+      <div className="mx-auto max-w-6xl">
       {/* Breadcrumb */}
       <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted">
         <Link href="/" className="hover:text-rose">Нүүр</Link>
@@ -68,13 +69,15 @@ export default async function ProductPage({
         <span className="text-foreground">{product.name}</span>
       </nav>
 
-      <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
+      <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[minmax(0,440px)_1fr] lg:gap-14">
         {/* Gallery */}
-        <ProductGallery
-          images={product.images ?? []}
-          shade={product.shade}
-          colors={product.colors ?? []}
-        />
+        <div className="md:sticky md:top-28 md:self-start">
+          <ProductGallery
+            images={product.images ?? []}
+            shade={product.shade}
+            colors={product.colors ?? []}
+          />
+        </div>
 
         {/* Info */}
         <div className="flex flex-col">
@@ -195,6 +198,7 @@ export default async function ProductPage({
           </div>
         </section>
       )}
+      </div>
     </div>
   );
 }

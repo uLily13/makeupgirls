@@ -17,7 +17,7 @@ export default async function ShopPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-7xl px-5 py-20 text-center text-muted lg:px-8">
+        <div className="wrap py-20 text-center text-muted">
           Ачааллаж байна…
         </div>
       }

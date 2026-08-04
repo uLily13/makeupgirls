@@ -32,7 +32,7 @@ export function ProductGallery({
       />
       {thumbs.length > 1 && (
         <div className="grid grid-cols-5 gap-3">
-          {thumbs.slice(0, 5).map((t, i) => (
+          {thumbs.slice(0, 10).map((t, i) => (
             <button
               key={i}
               onClick={() => setActive(i)}

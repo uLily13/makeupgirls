@@ -44,7 +44,7 @@ export function RecentlyViewed({ exclude }: { exclude?: string }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+    <section className="wrap py-8 lg:py-12">
       <h2 className="mb-6 font-display text-2xl">Сүүлд үзсэн</h2>
       <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4 lg:grid-cols-6">
         {items.map((p) => (

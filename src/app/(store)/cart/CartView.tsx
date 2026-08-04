@@ -249,7 +249,7 @@ export function CartView({
       {checkout && user && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-plum/20 p-4 backdrop-blur-sm">
           <div onClick={() => setCheckout(false)} className="absolute inset-0" aria-hidden />
-          <div className="glass relative my-8 w-full max-w-md rounded-3xl p-6 md:p-8">
+          <div className="card relative my-8 w-full max-w-md p-6 md:p-8">
             <h3 className="font-display text-2xl">Захиалга баталгаажуулах</h3>
 
             {showAddrForm ? (
@@ -327,7 +327,7 @@ export function CartView({
                   ))}
                 </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-white/40 pt-4">
+                <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
                   <span className="text-sm text-muted">Нийт төлөх</span>
                   <span className="font-display text-xl">{MNT(total)}</span>
                 </div>

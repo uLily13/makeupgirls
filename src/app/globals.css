@@ -273,6 +273,48 @@ input[type="number"] {
   transform: scale(0.97);
 }
 
+/* ============================================================
+   CORAL FLAT LAYOUT SYSTEM
+   Full-bleed sections + a wide inner container so content uses
+   the whole page instead of a narrow centred column.
+   ============================================================ */
+.wrap {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  .wrap { padding-inline: 2rem; }
+}
+@media (min-width: 1024px) {
+  .wrap { padding-inline: 3rem; }
+}
+
+/* Flat white card with a soft coral-tinted shadow (replaces glass). */
+.card {
+  background: var(--surface);
+  border-radius: 1.5rem;
+  box-shadow: 0 22px 55px -34px rgba(125, 74, 92, 0.55);
+}
+.card-hover {
+  transition: transform 0.4s var(--ease-out-soft), box-shadow 0.4s var(--ease-out-soft);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px -30px rgba(125, 74, 92, 0.55);
+}
+
+/* Solid coral pill button (primary action on the flat design). */
+.btn-coral {
+  background: var(--rose);
+  color: var(--foreground);
+}
+.btn-coral:hover {
+  background: var(--rose-deep);
+  color: #fff;
+}
+
 } /* end @layer components */
 
 @media (prefers-reduced-motion: reduce) {

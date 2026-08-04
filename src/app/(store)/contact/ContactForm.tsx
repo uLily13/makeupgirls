@@ -23,7 +23,7 @@ export function ContactForm() {
 
   if (done) {
     return (
-      <div className="glass glass-rim rounded-3xl p-8 text-center">
+      <div className="card p-8 text-center">
         <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-green-50 text-2xl text-green-600">
           ✓
         </div>
@@ -42,7 +42,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={submit} className="glass glass-rim space-y-4 rounded-3xl p-6 md:p-8">
+    <form onSubmit={submit} className="card space-y-4 p-6 md:p-8">
       {error && (
         <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
       )}

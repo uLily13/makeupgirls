@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Category, Subcategory } from "@/lib/products";
+import { SingleImageUploader } from "@/components/admin/ImageUploader";
 import {
   saveCategory,
   toggleCategoryHidden,
@@ -76,10 +77,19 @@ export function MenuManager({
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span
-                    className="h-8 w-8 rounded-full"
-                    style={{ background: c.accent }}
-                  />
+                  {c.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={c.image}
+                      alt=""
+                      className="h-9 w-9 shrink-0 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <span
+                      className="h-8 w-8 rounded-full"
+                      style={{ background: c.accent }}
+                    />
+                  )}
                   <div>
                     <div className="flex items-center gap-2 font-semibold">
                       {c.name}
@@ -227,6 +237,20 @@ export function MenuManager({
                   }
                   className={inputCls}
                 />
+              </div>
+            </Labeled>
+            <Labeled label="Зураг (заавал биш — тавибал нүүр хуудасны хавтан зураг болно)">
+              <div className="flex items-center gap-3">
+                <SingleImageUploader
+                  value={catForm.image}
+                  onChange={(url) => setCatForm({ ...catForm, image: url })}
+                  size="lg"
+                />
+                <span className="text-xs text-muted">
+                  {catForm.image
+                    ? "Зураг тавьсан. Дарж устгана."
+                    : "Зураггүй бол одоогийн өнгөт хэлбэрээр харагдана."}
+                </span>
               </div>
             </Labeled>
           </div>

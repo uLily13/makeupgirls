@@ -29,7 +29,7 @@ export function CartDrawer() {
         }}
         className="absolute right-2 top-2 h-[calc(100%-1rem)] w-[calc(100%-1rem)] max-w-md transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
       >
-      <aside className="glass flex h-full w-full flex-col rounded-3xl">
+      <aside className="card flex h-full w-full flex-col">
         <div className="flex items-center justify-between border-b border-line px-6 py-5">
           <h2 className="font-display text-xl">
             Сагс{" "}

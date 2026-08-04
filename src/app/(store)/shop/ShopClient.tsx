@@ -57,7 +57,7 @@ export function ShopClient({
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
+    <div className="wrap py-10 lg:py-14">
       {/* Header */}
       <div className="mb-8 border-b border-line pb-8">
         <p className="text-xs uppercase tracking-[0.2em] text-rose-deep">
@@ -150,7 +150,7 @@ export function ShopClient({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 md:gap-7 lg:grid-cols-4 xl:grid-cols-5">
           {list.map((p) => (
             <ProductCard key={p.slug} product={p} />
           ))}
@@ -175,7 +175,7 @@ function Chip({
       className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium transition-colors ${
         active
           ? "bg-foreground text-white"
-          : "glass glass-rim text-foreground/70 hover:text-rose-deep"
+          : "bg-blush/70 text-foreground/70 hover:bg-rose/40 hover:text-rose-deep"
       }`}
     >
       {children}

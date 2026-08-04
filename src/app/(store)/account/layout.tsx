@@ -22,7 +22,7 @@ export default async function AccountLayout({
       </div>
 
       <div className="grid gap-8 md:grid-cols-[220px_1fr]">
-        <aside className="glass glass-rim h-fit rounded-2xl p-3 md:sticky md:top-24">
+        <aside className="card h-fit rounded-2xl p-3 md:sticky md:top-24">
           <AccountNav />
         </aside>
         <div>{children}</div>

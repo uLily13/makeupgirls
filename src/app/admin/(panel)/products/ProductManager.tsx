@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MNT, type Product, type Category, type Subcategory } from "@/lib/products";
-import { SingleImageUploader } from "@/components/admin/ImageUploader";
+import { ImageUploader, SingleImageUploader } from "@/components/admin/ImageUploader";
 import {
   saveProduct,
   deleteProduct,
@@ -31,6 +31,7 @@ const empty = (): FormState => ({
   stock: 50,
   usage: "",
   badge: "",
+  bundle: false,
   short: "",
   description: "",
   ingredientsText: "",
@@ -75,6 +76,7 @@ export function ProductManager({
       stock: p.stock ?? 0,
       usage: p.usage ?? "",
       badge: p.badge ?? "",
+      bundle: p.bundle ?? false,
       short: p.short,
       description: p.description,
       ingredientsText: (p.ingredients ?? []).join(", "),
@@ -174,6 +176,7 @@ export function ProductManager({
                       )}
                       {onSale && <Tag color="rose">Урамшуулал</Tag>}
                       {p.badge && <Tag color="gold">{p.badge}</Tag>}
+                      {p.bundle && <Tag color="rose">Багц</Tag>}
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -455,6 +458,20 @@ export function ProductManager({
                 className={inputCls}
               />
             </Field>
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3.5 py-3 sm:col-span-2">
+              <input
+                type="checkbox"
+                checked={!!form.bundle}
+                onChange={(e) => setForm({ ...form, bundle: e.target.checked })}
+                className="h-4 w-4 accent-rose-deep"
+              />
+              <span className="text-sm font-medium">
+                Багц бүтээгдэхүүн
+                <span className="ml-2 font-normal text-muted">
+                  (нүүр хуудасны «Багц» табд харагдана)
+                </span>
+              </span>
+            </label>
             <Field label="Богино тайлбар" full>
               <input
                 value={form.short}
@@ -480,45 +497,17 @@ export function ProductManager({
                 className={`${inputCls} resize-none`}
               />
             </Field>
-            <Field label="Зураг (2 зураг заавал)" full>
-              <div className="flex flex-wrap gap-6">
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-medium text-muted">
-                    Үндсэн зураг *
-                  </span>
-                  <SingleImageUploader
-                    size="lg"
-                    value={form.images[0] || undefined}
-                    onChange={(url) =>
-                      setForm((f) => {
-                        if (!f) return f;
-                        const images = [f.images[0] ?? "", f.images[1] ?? ""];
-                        images[0] = url ?? "";
-                        return { ...f, images };
-                      })
-                    }
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-medium text-muted">
-                    Hover зураг *
-                  </span>
-                  <SingleImageUploader
-                    size="lg"
-                    value={form.images[1] || undefined}
-                    onChange={(url) =>
-                      setForm((f) => {
-                        if (!f) return f;
-                        const images = [f.images[0] ?? "", f.images[1] ?? ""];
-                        images[1] = url ?? "";
-                        return { ...f, images };
-                      })
-                    }
-                  />
-                </div>
-              </div>
+            <Field label="Зураг (олон зураг нэмж болно)" full>
+              <ImageUploader
+                values={form.images}
+                onChange={(urls) =>
+                  setForm((f) => (f ? { ...f, images: urls } : f))
+                }
+              />
               <span className="mt-1 text-xs text-muted">
-                Үндсэн зураг картан дээр, hover зураг хулгана аваачихад харагдана.
+                1-р зураг картан дээрх үндсэн зураг, 2-р зураг хулгана аваачихад
+                харагдах hover зураг, бусад нь дэлгэрэнгүй хуудасны галерейд
+                харагдана. Дор хаяж 1 зураг шаардлагатай.
               </span>
             </Field>
           </div>
@@ -535,8 +524,7 @@ export function ProductManager({
                 !form.name ||
                 !form.slug ||
                 form.price <= 0 ||
-                !form.images[0] ||
-                !form.images[1]
+                !form.images[0]
               }
               onClick={submit}
               className="rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"

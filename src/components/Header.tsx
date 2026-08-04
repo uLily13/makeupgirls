@@ -193,7 +193,7 @@ export function Header({
           }}
           className="absolute left-3 top-3 h-[calc(100%-1.5rem)] w-[84%] max-w-sm transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
         >
-          <div className="glass flex h-full w-full flex-col rounded-3xl">
+          <div className="card flex h-full w-full flex-col">
             <div className="flex items-center justify-between px-6 py-5">
               <span className="font-display text-xl">
                 makeup<span className="text-rose-deep">girls</span>
@@ -214,7 +214,7 @@ export function Header({
                       aria-expanded={isOpen}
                     >
                       <span className="text-[17px] font-medium">{c.name}</span>
-                      <span className="glass grid h-9 w-9 place-items-center rounded-xl">
+                      <span className="grid h-9 w-9 place-items-center rounded-xl bg-blush">
                         <Chevron
                           className={`h-4 w-4 transition-transform duration-300 ${
                             isOpen ? "rotate-180" : ""

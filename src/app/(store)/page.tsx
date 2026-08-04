@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { HeroBanner } from "@/components/HeroBanner";
+import { FavesTabs } from "@/components/FavesTabs";
 import { TrendingSocial } from "@/components/TrendingSocial";
 import { ProductCard } from "@/components/ProductCard";
-import { ProductVisual } from "@/components/ProductVisual";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { getStore, resolveContent, visibleCategories, withRatings } from "@/lib/db";
 
@@ -14,126 +14,82 @@ export default async function Home() {
   const cats = visibleCategories(store);
   const prods = withRatings(store);
 
-  const bestSellers = prods.filter((p) => p.badge === "Хит").slice(0, 4);
-  const newArrivals = prods.filter((p) => p.badge === "Шинэ").slice(0, 4);
+  const bestSellers = prods.filter((p) => p.badge === "Хит").slice(0, 10);
+  const bundles = prods
+    .filter((p) => p.bundle || p.category === "sets")
+    .slice(0, 10);
+  const newArrivals = prods.filter((p) => p.badge === "Шинэ").slice(0, 5);
   const c = (k: string, fallback = "") => content[k] ?? fallback;
 
   return (
     <>
-      {/* Large full-bleed hero banner (fills with hero.image when uploaded) */}
+      {/* Large full-bleed hero carousel */}
       <HeroBanner content={content} />
 
-      {/* Category strip */}
-      <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-rose-deep">
-              {c("home.cat.eyebrow")}
-            </p>
-            <h2 className="mt-1 font-display text-3xl">{c("home.cat.title")}</h2>
-          </div>
-          <Link href="/shop" className="link-underline text-sm font-medium">
-            Бүгдийг үзэх →
-          </Link>
-        </div>
-        <div className="grid grid-cols-3 gap-3 md:grid-cols-6 md:gap-5">
+      {/* Faves — best sellers & bundles as tabs */}
+      <SectionBand bg={c("home.faves.bg")}>
+        <FavesTabs
+          eyebrow={c("home.faves.eyebrow")}
+          title={c("home.faves.title")}
+          tab1={c("home.faves.tab1", "Хит бүтээгдэхүүн")}
+          tab2={c("home.faves.tab2", "Багц")}
+          best={bestSellers}
+          bundles={bundles}
+        />
+      </SectionBand>
+
+      {/* Categories (below the faves section) */}
+      <SectionBand bg={c("home.cat.bg")} base="bg-blush/60">
+        <SectionHead eyebrow={c("home.cat.eyebrow")} title={c("home.cat.title")} />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {cats.map((cat) => (
             <Link
               key={cat.slug}
               href={`/shop?cat=${cat.slug}`}
-              className="group flex flex-col items-center gap-3"
+              className="card-hover group relative block aspect-[4/5] overflow-hidden rounded-3xl"
             >
-              <div className="squish grid aspect-square w-full place-items-center overflow-hidden rounded-full bg-blush shadow-[0_14px_34px_-20px_rgba(125,74,92,0.6)] transition-transform duration-500 group-hover:scale-105">
-                <ProductVisual shade={cat.accent} className="h-full w-full" />
+              {cat.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={cat.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                />
+              ) : (
+                <div
+                  className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                  style={{
+                    background: `radial-gradient(120% 120% at 30% 22%, #ffffff 0%, ${cat.accent}66 55%, ${cat.accent} 100%)`,
+                  }}
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-plum/65 via-plum/5 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-4">
+                <div className="font-display text-lg leading-tight text-white">
+                  {cat.name}
+                </div>
+                <div className="mt-0.5 line-clamp-1 text-[11px] text-white/80">
+                  {cat.tagline}
+                </div>
               </div>
-              <span className="text-center text-sm font-medium">{cat.name}</span>
             </Link>
           ))}
         </div>
-      </section>
-
-      {/* Best sellers */}
-      {bestSellers.length > 0 && (
-        <section className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-rose-deep">
-                {c("home.best.eyebrow")}
-              </p>
-              <h2 className="mt-1 font-display text-3xl">
-                {c("home.best.title")}
-              </h2>
-            </div>
-            <Link href="/shop" className="link-underline text-sm font-medium">
-              Бүгдийг үзэх →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-4 md:gap-6">
-            {bestSellers.map((p) => (
-              <ProductCard key={p.slug} product={p} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Editorial banner */}
-      <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-        <div className="grid overflow-hidden rounded-3xl bg-foreground text-white md:grid-cols-2">
-          <div className="flex flex-col justify-center gap-5 p-10 md:p-14">
-            <span className="text-xs uppercase tracking-[0.25em] text-white/50">
-              {c("edito.eyebrow")}
-            </span>
-            <h3 className="font-display text-3xl leading-tight md:text-4xl">
-              {c("edito.title")}
-            </h3>
-            <p className="max-w-md text-sm leading-relaxed text-white/70">
-              {c("edito.body")}
-            </p>
-            <Link
-              href="/shop?cat=skincare"
-              className="mt-2 w-fit rounded-full bg-white px-7 py-3 text-sm font-medium text-foreground transition-transform hover:scale-[1.03]"
-            >
-              {c("edito.cta")}
-            </Link>
-          </div>
-          <div className="relative min-h-64 bg-gradient-to-br from-rose/40 via-blush-deep/30 to-transparent">
-            <div className="absolute inset-0 grid grid-cols-2 gap-4 p-8">
-              {["#cfe6dc", "#f3e3d0", "#e69ba0", "#d98f97"].map((col, i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl shadow-xl"
-                  style={{
-                    background: `linear-gradient(160deg, ${col}, rgba(0,0,0,0.15))`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      </SectionBand>
 
       {/* New arrivals */}
       {newArrivals.length > 0 && (
-        <section className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-rose-deep">
-                {c("home.new.eyebrow")}
-              </p>
-              <h2 className="mt-1 font-display text-3xl">
-                {c("home.new.title")}
-              </h2>
-            </div>
-            <Link href="/shop" className="link-underline text-sm font-medium">
-              Бүгдийг үзэх →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-4 md:gap-6">
+        <SectionBand bg={c("home.new.bg")}>
+          <SectionHead
+            eyebrow={c("home.new.eyebrow")}
+            title={c("home.new.title")}
+          />
+          <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-4 md:gap-7 xl:grid-cols-5">
             {newArrivals.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}
           </div>
-        </section>
+        </SectionBand>
       )}
 
       {/* Trending on social */}
@@ -143,16 +99,19 @@ export default async function Home() {
       <RecentlyViewed />
 
       {/* Value props */}
-      <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-        <div className="glass glass-rim grid gap-6 rounded-[2rem] p-8 sm:grid-cols-2 md:grid-cols-4 md:p-10">
+      <SectionBand bg={c("home.vp.bg")}>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { t: c("vp1.t"), d: c("vp1.d"), i: "🚚" },
             { t: c("vp2.t"), d: c("vp2.d"), i: "✓" },
             { t: c("vp3.t"), d: c("vp3.d"), i: "💳" },
             { t: c("vp4.t"), d: c("vp4.d"), i: "↺" },
           ].map((v) => (
-            <div key={v.t} className="flex flex-col gap-2">
-              <div className="glass glass-rim grid h-11 w-11 place-items-center rounded-full text-lg">
+            <div
+              key={v.t}
+              className="flex flex-col gap-3 rounded-3xl bg-blush/60 p-7"
+            >
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-xl shadow-[0_10px_24px_-16px_rgba(125,74,92,0.6)]">
                 {v.i}
               </div>
               <div className="mt-1 font-medium">{v.t}</div>
@@ -160,7 +119,53 @@ export default async function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </SectionBand>
     </>
+  );
+}
+
+// A full-bleed home section. When `bg` (an image URL) is set it becomes the
+// section background with a light overlay so text stays readable; otherwise the
+// `base` class (e.g. a coral tint) is used. Content sits in a wide container.
+function SectionBand({
+  bg,
+  base = "",
+  pad = "py-16 lg:py-24",
+  children,
+}: {
+  bg?: string;
+  base?: string;
+  pad?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className={`relative ${bg ? "" : base}`}>
+      {bg && (
+        <>
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url("${bg}")` }}
+          />
+          <div className="absolute inset-0 bg-white/78" />
+        </>
+      )}
+      <div className={`relative wrap ${pad}`}>{children}</div>
+    </section>
+  );
+}
+
+function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="mb-9 flex items-end justify-between gap-4">
+      <div>
+        <p className="text-xs uppercase tracking-[0.2em] text-rose-deep">
+          {eyebrow}
+        </p>
+        <h2 className="mt-1.5 font-display text-3xl md:text-4xl">{title}</h2>
+      </div>
+      <Link href="/shop" className="link-underline shrink-0 text-sm font-medium">
+        Бүгдийг үзэх →
+      </Link>
+    </div>
   );
 }

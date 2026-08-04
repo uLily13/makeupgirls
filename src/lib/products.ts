@@ -3,6 +3,7 @@ export type Category = {
   name: string;
   tagline: string;
   accent: string; // distinct swatch color for the category
+  image?: string; // optional tile image shown on the home category grid
   hidden?: boolean; // hidden from the customer storefront
 };
 
@@ -45,6 +46,7 @@ export type Product = {
   stock: number; // available inventory
   usage: string; // хэрэглэх заавар
   badge?: "Шинэ" | "Хит" | "Хямдрал";
+  bundle?: boolean; // marketed as a bundle / value set (shown in the "Багц" tab)
   short: string;
   description: string;
   ingredients: string[];
@@ -95,6 +97,13 @@ export type Feedback = {
   message: string;
   createdAt: string;
   handled?: boolean;
+};
+
+// -------- Newsletter subscribers --------
+
+export type Subscriber = {
+  email: string;
+  createdAt: string;
 };
 
 // Editable site text — every value keeps its previous versions.
@@ -181,6 +190,7 @@ export type Store = {
   reviews: Review[];
   promotions: Promotion[];
   feedback: Feedback[];
+  subscribers: Subscriber[];
   updatedAt: string;
 };
 

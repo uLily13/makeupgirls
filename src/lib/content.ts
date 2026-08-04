@@ -26,13 +26,37 @@ export const seedContent: Omit<ContentItem, "history">[] = [
   { key: "hero.stat3v", group: "Нүүр — Hero", label: "Статистик 3 — тоо", value: "4.9★" },
   { key: "hero.stat3l", group: "Нүүр — Hero", label: "Статистик 3 — нэр", value: "Үнэлгээ" },
 
+  // Hero — 2-р слайд (заавал биш. Гарчиг эсвэл зураг тавибал слайд нэмэгдэнэ)
+  { key: "hero.2.image", group: "Нүүр — Hero (2-р слайд)", label: "Зураг", value: "", image: true },
+  { key: "hero.2.badge", group: "Нүүр — Hero (2-р слайд)", label: "Тэмдэг", value: "" },
+  { key: "hero.2.title", group: "Нүүр — Hero (2-р слайд)", label: "Гарчиг (мөр 1)", value: "" },
+  { key: "hero.2.titleAccent", group: "Нүүр — Hero (2-р слайд)", label: "Гарчиг (мөр 2, өнгөт)", value: "" },
+  { key: "hero.2.subtitle", group: "Нүүр — Hero (2-р слайд)", label: "Тайлбар", value: "", multiline: true },
+
+  // Hero — 3-р слайд (заавал биш)
+  { key: "hero.3.image", group: "Нүүр — Hero (3-р слайд)", label: "Зураг", value: "", image: true },
+  { key: "hero.3.badge", group: "Нүүр — Hero (3-р слайд)", label: "Тэмдэг", value: "" },
+  { key: "hero.3.title", group: "Нүүр — Hero (3-р слайд)", label: "Гарчиг (мөр 1)", value: "" },
+  { key: "hero.3.titleAccent", group: "Нүүр — Hero (3-р слайд)", label: "Гарчиг (мөр 2, өнгөт)", value: "" },
+  { key: "hero.3.subtitle", group: "Нүүр — Hero (3-р слайд)", label: "Тайлбар", value: "", multiline: true },
+
   // Home sections
+  { key: "home.faves.eyebrow", group: "Нүүр — Хэсгүүд", label: "Онцлох — жижиг гарчиг", value: "Онцлох" },
+  { key: "home.faves.title", group: "Нүүр — Хэсгүүд", label: "Онцлох — гарчиг", value: "Онцлох бүтээгдэхүүн" },
+  { key: "home.faves.tab1", group: "Нүүр — Хэсгүүд", label: "Таб 1 — нэр", value: "Хит бүтээгдэхүүн" },
+  { key: "home.faves.tab2", group: "Нүүр — Хэсгүүд", label: "Таб 2 — нэр", value: "Багц" },
   { key: "home.cat.eyebrow", group: "Нүүр — Хэсгүүд", label: "Ангилал — жижиг гарчиг", value: "Ангилал" },
   { key: "home.cat.title", group: "Нүүр — Хэсгүүд", label: "Ангилал — гарчиг", value: "Юу хайж байна?" },
   { key: "home.best.eyebrow", group: "Нүүр — Хэсгүүд", label: "Хит — жижиг гарчиг", value: "Хамгийн их зарагдсан" },
   { key: "home.best.title", group: "Нүүр — Хэсгүүд", label: "Хит — гарчиг", value: "Хит бүтээгдэхүүн" },
   { key: "home.new.eyebrow", group: "Нүүр — Хэсгүүд", label: "Шинэ — жижиг гарчиг", value: "Шинээр ирсэн" },
   { key: "home.new.title", group: "Нүүр — Хэсгүүд", label: "Шинэ — гарчиг", value: "Шинэ цуглуулга" },
+
+  // Home section background images (заавал биш)
+  { key: "home.faves.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Онцлох» хэсгийн дэвсгэр зураг", value: "", image: true },
+  { key: "home.cat.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Ангилал» хэсгийн дэвсгэр зураг", value: "", image: true },
+  { key: "home.new.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Шинэ цуглуулга» хэсгийн дэвсгэр зураг", value: "", image: true },
+  { key: "home.vp.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Давуу тал» хэсгийн дэвсгэр зураг", value: "", image: true },
 
   // Editorial
   { key: "edito.eyebrow", group: "Нүүр — Editorial", label: "Жижиг гарчиг", value: "Clean Beauty" },

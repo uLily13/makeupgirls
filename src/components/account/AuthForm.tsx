@@ -34,7 +34,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-5 py-16 lg:py-24">
-      <div className="glass glass-rim rounded-3xl p-8 md:p-10">
+      <div className="card p-8 md:p-10">
         <h1 className="font-display text-3xl">
           {isLogin ? "Нэвтрэх" : "Бүртгүүлэх"}
         </h1>

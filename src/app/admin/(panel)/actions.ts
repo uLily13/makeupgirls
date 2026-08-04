@@ -38,6 +38,7 @@ export type ProductInput = {
   stock: number;
   usage: string;
   badge?: Product["badge"] | "";
+  bundle?: boolean;
   short: string;
   description: string;
   ingredients?: string[];
@@ -67,6 +68,7 @@ export async function saveProduct(input: ProductInput) {
       stock: Math.max(0, input.stock),
       usage: input.usage,
       badge,
+      bundle: input.bundle ?? false,
       short: input.short,
       description: input.description,
       ingredients: input.ingredients ?? [],
@@ -93,6 +95,7 @@ export async function saveProduct(input: ProductInput) {
       stock: Math.max(0, input.stock),
       usage: input.usage,
       badge,
+      bundle: input.bundle ?? false,
       short: input.short,
       description: input.description,
       ingredients: input.ingredients ?? p.ingredients,
@@ -312,6 +315,15 @@ export async function toggleFeedbackHandled(id: string) {
 export async function deleteFeedback(id: string) {
   const store = await getStore();
   store.feedback = store.feedback.filter((f) => f.id !== id);
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ SUBSCRIBERS ============================
+
+export async function deleteSubscriber(email: string) {
+  const store = await getStore();
+  store.subscribers = (store.subscribers ?? []).filter((s) => s.email !== email);
   await saveStore(store);
   refresh();
 }

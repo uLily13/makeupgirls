@@ -133,6 +133,7 @@ function buildSeed(): Store {
     reviews: [],
     promotions: [],
     feedback: [],
+    subscribers: [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -162,6 +163,7 @@ export async function getStore(): Promise<Store> {
   if (!store.reviews) { store.reviews = []; changed = true; }
   if (!store.promotions) { store.promotions = []; changed = true; }
   if (!store.feedback) { store.feedback = []; changed = true; }
+  if (!store.subscribers) { store.subscribers = []; changed = true; }
   for (const u of store.users) {
     if (!u.favorites) {
       u.favorites = [];
