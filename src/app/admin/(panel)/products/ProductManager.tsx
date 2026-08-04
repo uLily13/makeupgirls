@@ -28,7 +28,7 @@ const empty = (): FormState => ({
   shade: "#d98f97",
   colors: [{ name: "Өнгө 1", hex: "#d98f97" }],
   images: [],
-  stock: 50,
+  stock: 0,
   usage: "",
   badge: "",
   bundle: false,
@@ -182,21 +182,12 @@ export function ProductManager({
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
                       <MiniBtn onClick={() => openEdit(p)}>Засах</MiniBtn>
-                      {onSale ? (
+                      {onSale && (
                         <MiniBtn
                           onClick={() => run(() => endPromotion(p.slug))}
                           disabled={pending}
                         >
                           Урамшуулал зогсоох
-                        </MiniBtn>
-                      ) : (
-                        <MiniBtn
-                          onClick={() => {
-                            setPromoFor(p.slug);
-                            setPromoPrice("");
-                          }}
-                        >
-                          Урамшуулал
                         </MiniBtn>
                       )}
                       <MiniBtn
@@ -404,9 +395,13 @@ export function ProductManager({
             <Field label="Үнэ (₮)">
               <input
                 type="number"
-                value={form.price}
+                value={form.price || ""}
+                placeholder="0"
                 onChange={(e) =>
-                  setForm({ ...form, price: Number(e.target.value) })
+                  setForm({
+                    ...form,
+                    price: e.target.value === "" ? 0 : Number(e.target.value),
+                  })
                 }
                 className={inputCls}
               />
@@ -427,9 +422,13 @@ export function ProductManager({
             <Field label="Үлдэгдэл (ширхэг)">
               <input
                 type="number"
-                value={form.stock}
+                value={form.stock || ""}
+                placeholder="0"
                 onChange={(e) =>
-                  setForm({ ...form, stock: Number(e.target.value) })
+                  setForm({
+                    ...form,
+                    stock: e.target.value === "" ? 0 : Number(e.target.value),
+                  })
                 }
                 className={inputCls}
               />

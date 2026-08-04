@@ -9,6 +9,7 @@ import { TrackRecentlyViewed } from "@/components/RecentlyViewed";
 import { AddToCart } from "./AddToCart";
 import { ProductGallery } from "./ProductGallery";
 import { ReviewSection } from "./ReviewSection";
+import { IngredientList } from "./IngredientList";
 
 export const dynamic = "force-dynamic";
 
@@ -134,21 +135,7 @@ export default async function ProductPage({
 
           {/* Ingredients */}
           {product.ingredients.length > 0 && (
-            <div className="mt-10">
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
-                Гол найрлага
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {product.ingredients.map((ing) => (
-                  <span
-                    key={ing}
-                    className="rounded-full bg-blush px-4 py-2 text-sm text-rose-deep"
-                  >
-                    {ing}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <IngredientList ingredients={product.ingredients} />
           )}
 
           {/* Usage instructions */}

@@ -45,12 +45,12 @@ export default async function Home() {
       {/* Categories (below the faves section) */}
       <SectionBand bg={c("home.cat.bg")} base="bg-blush/60">
         <SectionHead eyebrow={c("home.cat.eyebrow")} title={c("home.cat.title")} />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
           {cats.map((cat) => (
             <Link
               key={cat.slug}
               href={`/shop?cat=${cat.slug}`}
-              className="card-hover group relative block aspect-[4/5] overflow-hidden rounded-3xl"
+              className="card-hover group relative block aspect-[4/5] w-40 shrink-0 snap-start overflow-hidden rounded-3xl sm:w-48 lg:w-52"
             >
               {cat.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -97,7 +97,7 @@ export default async function Home() {
       )}
 
       {/* Trending on social */}
-      <TrendingSocial content={content} />
+      <TrendingSocial posts={store.trendingPosts ?? []} content={content} />
 
       {/* Recently viewed (client, from localStorage) */}
       <RecentlyViewed />

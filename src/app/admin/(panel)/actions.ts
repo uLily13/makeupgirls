@@ -11,6 +11,7 @@ import type {
   Promotion,
   OrderStatus,
   HeroSlide,
+  TrendingPost,
 } from "@/lib/products";
 
 // NOTE: These are public POST endpoints. Before production, gate every action
@@ -335,6 +336,23 @@ export async function saveHeroSlides(slides: HeroSlide[]) {
     }))
     // Drop fully-empty slides (no image and no text).
     .filter((s) => s.image || s.title || s.titleAccent || s.subtitle || s.badge);
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ TRENDING ON SOCIAL ============================
+
+export async function saveTrendingPosts(posts: TrendingPost[]) {
+  const store = await getStore();
+  store.trendingPosts = posts
+    .map((p) => ({
+      id: p.id || randomUUID(),
+      url: (p.url ?? "").trim(),
+      thumbnail: p.thumbnail || undefined,
+      caption: (p.caption ?? "").trim() || undefined,
+    }))
+    // Keep a post if it has a playable link or at least a cover image.
+    .filter((p) => p.url || p.thumbnail);
   await saveStore(store);
   refresh();
 }

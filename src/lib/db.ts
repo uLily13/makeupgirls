@@ -157,9 +157,16 @@ function buildSeed(): Store {
     feedback: [],
     subscribers: [],
     heroSlides: defaultHeroSlides(),
+    trendingPosts: [],
     updatedAt: new Date().toISOString(),
   };
 }
+
+// Old fixed "trending.N" image content keys, replaced by the trendingPosts array.
+const OBSOLETE_TRENDING_KEYS = new Set([
+  "trending.1", "trending.2", "trending.3",
+  "trending.4", "trending.5", "trending.6",
+]);
 
 /** Read the whole store, seeding on first run and back-filling new fields. */
 export async function getStore(): Promise<Store> {
@@ -212,9 +219,23 @@ export async function getStore(): Promise<Store> {
     store.heroSlides = slides;
     changed = true;
   }
-  // Drop obsolete hero content keys (replaced by heroSlides).
+  // Migrate the old fixed trending.N images into the dynamic trendingPosts array.
+  if (!store.trendingPosts) {
+    const cmap: Record<string, string> = {};
+    for (const c of store.content) cmap[c.key] = c.value;
+    const igLink = cmap["social.instagram"] || "";
+    store.trendingPosts = ["1", "2", "3", "4", "5", "6"]
+      .map((n) => cmap[`trending.${n}`])
+      .filter((img): img is string => !!img)
+      .map((img) => ({ id: randomUUID(), url: igLink, thumbnail: img }));
+    changed = true;
+  }
+
+  // Drop obsolete hero/trending content keys (replaced by array fields).
   const beforeLen = store.content.length;
-  store.content = store.content.filter((c) => !OBSOLETE_HERO_KEYS.has(c.key));
+  store.content = store.content.filter(
+    (c) => !OBSOLETE_HERO_KEYS.has(c.key) && !OBSOLETE_TRENDING_KEYS.has(c.key)
+  );
   if (store.content.length !== beforeLen) changed = true;
   for (const u of store.users) {
     if (!u.favorites) {

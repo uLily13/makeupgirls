@@ -8,9 +8,10 @@ import { adminLogout } from "@/app/admin/login/actions";
 const links = [
   { href: "/admin", label: "Хяналт", icon: "◵", exact: true },
   { href: "/admin/hero", label: "Hero баннер", icon: "▦" },
+  { href: "/admin/trending", label: "Trending / Reels", icon: "▶" },
   { href: "/admin/orders", label: "Захиалга", icon: "🛍" },
   { href: "/admin/products", label: "Бүтээгдэхүүн", icon: "▤" },
-  { href: "/admin/promotions", label: "Урамшуулал", icon: "％" },
+  { href: "/admin/promotions", label: "Хямдрал / Урамшуулал", icon: "％" },
   { href: "/admin/menu", label: "Цэс / Ангилал", icon: "☰" },
   { href: "/admin/content", label: "Текст контент", icon: "✎" },
   { href: "/admin/feedback", label: "Санал хүсэлт", icon: "✉" },

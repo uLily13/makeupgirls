@@ -110,6 +110,15 @@ export type HeroSlide = {
   subtitle: string;
 };
 
+// -------- Trending on social (Reel / TikTok embeds) --------
+
+export type TrendingPost = {
+  id: string;
+  url: string; // Instagram Reel / TikTok / YouTube link
+  thumbnail?: string; // optional cover image (else a branded gradient card)
+  caption?: string; // optional label under the card
+};
+
 // -------- Newsletter subscribers --------
 
 export type Subscriber = {
@@ -203,6 +212,7 @@ export type Store = {
   feedback: Feedback[];
   subscribers: Subscriber[];
   heroSlides: HeroSlide[];
+  trendingPosts: TrendingPost[];
   updatedAt: string;
 };
 
