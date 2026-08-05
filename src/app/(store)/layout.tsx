@@ -11,6 +11,7 @@ import {
   resolveContent,
   visibleCategories,
   visibleSubcategories,
+  visibleProducts,
   countProductsInSub,
 } from "@/lib/db";
 import { getCustomerUser } from "@/lib/auth";
@@ -44,6 +45,15 @@ export default async function StoreLayout({
     content["announce.4"],
   ].filter(Boolean);
 
+  const searchItems = visibleProducts(store).map((p) => ({
+    slug: p.slug,
+    name: p.name,
+    brand: p.brand,
+    price: p.price,
+    image: p.images?.[0] ?? p.colors?.find((c) => c.image)?.image,
+    shade: p.shade,
+  }));
+
   return (
     <>
       <LiquidBackground />
@@ -55,6 +65,7 @@ export default async function StoreLayout({
               announcements={announcements}
               user={user ? { name: user.name } : null}
               favCount={user?.favorites?.length ?? 0}
+              searchItems={searchItems}
             />
             <main className="flex-1">{children}</main>
             <Footer content={content} />

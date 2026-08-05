@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { MNT } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { Logo } from "./Logo";
 
@@ -12,21 +14,72 @@ export type MenuCategory = {
   subs: { slug: string; name: string; count: number }[];
 };
 
+export type SearchItem = {
+  slug: string;
+  name: string;
+  brand: string;
+  price: number;
+  image?: string;
+  shade: string;
+};
+
 export function Header({
   menu,
   announcements,
   user,
   favCount,
+  searchItems,
 }: {
   menu: MenuCategory[];
   announcements: string[];
   user: { name: string } | null;
   favCount: number;
+  searchItems: SearchItem[];
 }) {
+  const router = useRouter();
   const { count, setOpen } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [open, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  // Search overlay
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen) {
+      const t = setTimeout(() => searchRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [searchOpen]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSearchOpen(false);
+    if (searchOpen) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [searchOpen]);
+
+  const query = q.trim().toLowerCase();
+  const suggestions = query
+    ? searchItems
+        .filter((p) =>
+          `${p.name} ${p.brand}`.toLowerCase().includes(query)
+        )
+        .slice(0, 6)
+    : [];
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setQ("");
+  };
+  const submitSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const term = q.trim();
+    if (!term) return;
+    router.push(`/shop?q=${encodeURIComponent(term)}`);
+    closeSearch();
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -137,7 +190,11 @@ export function Header({
             >
               Дэлгүүр
             </Link>
-            <button aria-label="Хайх" className="hover:text-rose-deep">
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Хайх"
+              className="hover:text-rose-deep"
+            >
               <SearchIcon />
             </button>
             <Link
@@ -178,6 +235,95 @@ export function Header({
           </div>
         </header>
       </div>
+
+      {/* Search overlay */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-[60]">
+          <div
+            onClick={closeSearch}
+            className="absolute inset-0 bg-plum/25 backdrop-blur-sm"
+          />
+          <div className="absolute inset-x-0 top-0 bg-surface shadow-[0_24px_50px_-16px_rgba(125,74,92,0.4)]">
+            <div className="wrap py-5">
+              <form onSubmit={submitSearch} className="flex items-center gap-3">
+                <span className="text-muted">
+                  <SearchIcon />
+                </span>
+                <input
+                  ref={searchRef}
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Бүтээгдэхүүн, брэндээр хайх…"
+                  className="flex-1 bg-transparent py-1.5 text-base outline-none placeholder:text-muted"
+                />
+                <button
+                  type="button"
+                  onClick={closeSearch}
+                  aria-label="Хаах"
+                  className="grid h-9 w-9 place-items-center rounded-full text-foreground/70 hover:bg-blush"
+                >
+                  <CloseIcon />
+                </button>
+              </form>
+
+              {query && (
+                <div className="mt-4 border-t border-line pt-3">
+                  {suggestions.length > 0 ? (
+                    <>
+                      <ul className="flex flex-col gap-1">
+                        {suggestions.map((p) => (
+                          <li key={p.slug}>
+                            <Link
+                              href={`/product/${p.slug}`}
+                              onClick={closeSearch}
+                              className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-blush/60"
+                            >
+                              <span
+                                className="h-12 w-10 shrink-0 overflow-hidden rounded-lg bg-blush"
+                                style={{ background: p.shade }}
+                              >
+                                {p.image && (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={p.image}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                  />
+                                )}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-medium">
+                                  {p.name}
+                                </span>
+                                <span className="block text-xs text-muted">
+                                  {p.brand}
+                                </span>
+                              </span>
+                              <span className="shrink-0 text-sm font-semibold">
+                                {MNT(p.price)}
+                              </span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                      <button
+                        onClick={() => submitSearch()}
+                        className="mt-2 w-full rounded-xl bg-foreground py-2.5 text-sm font-medium text-white hover:bg-rose-deep"
+                      >
+                        «{q.trim()}» бүх илэрцийг харах →
+                      </button>
+                    </>
+                  ) : (
+                    <p className="py-6 text-center text-sm text-muted">
+                      «{q.trim()}» — илэрц олдсонгүй. Enter дарж дэлгүүрээс хайна уу.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile drawer with accordion */}
       <div

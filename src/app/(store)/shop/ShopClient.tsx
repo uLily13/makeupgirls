@@ -22,6 +22,18 @@ export function ShopClient({
   const sub = params.get("sub") ?? "";
   const [sort, setSort] = useState<Sort>("featured");
 
+  // Free-text search — seeded from the ?q= param (e.g. from the nav search),
+  // then editable locally. When the URL's q changes (a fresh nav search while
+  // already on /shop), re-sync during render without an effect.
+  const qParam = params.get("q") ?? "";
+  const [search, setSearch] = useState(qParam);
+  const [prevQParam, setPrevQParam] = useState(qParam);
+  if (qParam !== prevQParam) {
+    setPrevQParam(qParam);
+    setSearch(qParam);
+  }
+  const q = search.trim().toLowerCase();
+
   const activeCat = categories.find((c) => c.slug === cat);
   const activeSub = subcategories.find((s) => s.slug === sub);
   const subs =
@@ -33,6 +45,13 @@ export function ShopClient({
     let l =
       cat === "all" ? products : products.filter((p) => p.category === cat);
     if (sub) l = l.filter((p) => p.subcategory === sub);
+    if (q) {
+      l = l.filter((p) =>
+        `${p.name} ${p.brand} ${p.short} ${p.description} ${p.subcategory} ${(p.ingredients ?? []).join(" ")}`
+          .toLowerCase()
+          .includes(q)
+      );
+    }
     l = [...l];
     switch (sort) {
       case "price-asc":
@@ -46,7 +65,7 @@ export function ShopClient({
         break;
     }
     return l;
-  }, [cat, sub, sort]);
+  }, [cat, sub, sort, q, products]);
 
   const go = (nextCat: string, nextSub = "") => {
     const p = new URLSearchParams();
@@ -77,6 +96,31 @@ export function ShopClient({
               ? activeCat.tagline
               : "Гоо сайхны бүх бүтээгдэхүүн нэг дороос"}
         </p>
+      </div>
+
+      {/* Search bar */}
+      <div className="relative mb-6">
+        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </span>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Бүтээгдэхүүн, брэнд, найрлагаар хайх…"
+          className="w-full rounded-full border border-line bg-surface py-3 pl-11 pr-11 text-sm focus:border-rose focus:outline-none"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch("")}
+            aria-label="Цэвэрлэх"
+            className="absolute right-4 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-muted hover:bg-blush hover:text-rose-deep"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Category chips */}
@@ -140,13 +184,18 @@ export function ShopClient({
       {list.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
           <p className="text-muted">
-            {activeSub?.name ?? "Энэ ангилал"} — удахгүй нэмэгдэнэ ✦
+            {q
+              ? `«${search.trim()}» — илэрц олдсонгүй`
+              : `${activeSub?.name ?? "Энэ ангилал"} — удахгүй нэмэгдэнэ ✦`}
           </p>
           <button
-            onClick={() => go(cat)}
+            onClick={() => {
+              setSearch("");
+              go("all");
+            }}
             className="rounded-full border border-line bg-surface px-6 py-2.5 text-sm font-medium hover:border-rose hover:text-rose-deep"
           >
-            {activeCat?.name ?? "Бүх"} бүтээгдэхүүн үзэх
+            Бүх бүтээгдэхүүн үзэх
           </button>
         </div>
       ) : (
