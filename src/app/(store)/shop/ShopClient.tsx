@@ -1,11 +1,22 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Category, Subcategory, Product } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
+import {
+  dominantColorFromFile,
+  distanceToSwatches,
+  hexToRgb,
+} from "@/lib/color";
 
 type Sort = "featured" | "price-asc" | "price-desc" | "rating";
+
+// All swatch hexes for a product (primary shade + colour variants).
+const swatchesOf = (p: Product): string[] => [
+  p.shade,
+  ...(p.colors ?? []).map((c) => c.hex),
+];
 
 export function ShopClient({
   categories,
@@ -34,6 +45,34 @@ export function ShopClient({
   }
   const q = search.trim().toLowerCase();
 
+  // Image ("search by colour"): the uploaded photo's dominant colour, seeded
+  // from ?color=RRGGBB (e.g. from the nav search). Products are ranked by how
+  // close their swatches are to this colour.
+  const colorParam = params.get("color");
+  const initColor = colorParam ? `#${colorParam.replace(/^#/, "")}` : null;
+  const [colorHex, setColorHex] = useState<string | null>(initColor);
+  const [prevColorParam, setPrevColorParam] = useState(colorParam);
+  if (colorParam !== prevColorParam) {
+    setPrevColorParam(colorParam);
+    setColorHex(initColor);
+  }
+  const [colorBusy, setColorBusy] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const pickImage = async (file: File | undefined) => {
+    if (!file) return;
+    setColorBusy(true);
+    try {
+      const hex = await dominantColorFromFile(file);
+      setColorHex(hex);
+    } catch {
+      /* ignore unreadable image */
+    } finally {
+      setColorBusy(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    }
+  };
+
   const activeCat = categories.find((c) => c.slug === cat);
   const activeSub = subcategories.find((s) => s.slug === sub);
   const subs =
@@ -53,19 +92,29 @@ export function ShopClient({
       );
     }
     l = [...l];
-    switch (sort) {
-      case "price-asc":
-        l.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        l.sort((a, b) => b.price - a.price);
-        break;
-      case "rating":
-        l.sort((a, b) => b.rating - a.rating);
-        break;
+    const target = colorHex ? hexToRgb(colorHex) : null;
+    if (target) {
+      // Colour search overrides the sort — closest swatch first.
+      l.sort(
+        (a, b) =>
+          distanceToSwatches(target, swatchesOf(a)) -
+          distanceToSwatches(target, swatchesOf(b))
+      );
+    } else {
+      switch (sort) {
+        case "price-asc":
+          l.sort((a, b) => a.price - b.price);
+          break;
+        case "price-desc":
+          l.sort((a, b) => b.price - a.price);
+          break;
+        case "rating":
+          l.sort((a, b) => b.rating - a.rating);
+          break;
+      }
     }
     return l;
-  }, [cat, sub, sort, q, products]);
+  }, [cat, sub, sort, q, colorHex, products]);
 
   const go = (nextCat: string, nextSub = "") => {
     const p = new URLSearchParams();
@@ -110,18 +159,66 @@ export function ShopClient({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Бүтээгдэхүүн, брэнд, найрлагаар хайх…"
-          className="w-full rounded-full border border-line bg-surface py-3 pl-11 pr-11 text-sm focus:border-rose focus:outline-none"
+          className="w-full rounded-full border border-line bg-surface py-3 pl-11 pr-24 text-sm focus:border-rose focus:outline-none"
         />
-        {search && (
+        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1">
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              aria-label="Цэвэрлэх"
+              className="grid h-7 w-7 place-items-center rounded-full text-muted hover:bg-blush hover:text-rose-deep"
+            >
+              ✕
+            </button>
+          )}
           <button
-            onClick={() => setSearch("")}
-            aria-label="Цэвэрлэх"
-            className="absolute right-4 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-muted hover:bg-blush hover:text-rose-deep"
+            onClick={() => imageInputRef.current?.click()}
+            disabled={colorBusy}
+            title="Зургаар (өнгөөр) хайх"
+            aria-label="Зургаар хайх"
+            className="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:bg-blush hover:text-rose-deep disabled:opacity-50"
           >
-            ✕
+            {colorBusy ? (
+              "…"
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
+                <circle cx="8.5" cy="10" r="1.6" fill="currentColor" />
+                <path d="M4 17l5-4 4 3 3-2 4 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
           </button>
-        )}
+        </div>
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => pickImage(e.target.files?.[0])}
+        />
       </div>
+
+      {/* Colour-search banner */}
+      {colorHex && (
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-line bg-blush/40 px-4 py-3">
+          <span
+            className="h-8 w-8 shrink-0 rounded-full border border-white shadow-inner"
+            style={{ background: colorHex }}
+          />
+          <div className="min-w-0 flex-1 text-sm">
+            <span className="font-medium">Өнгөөр хайлт</span>
+            <span className="ml-2 text-muted">
+              Энэ өнгөнд ойрхон бүтээгдэхүүнүүд эхэлж харагдана
+            </span>
+          </div>
+          <button
+            onClick={() => setColorHex(null)}
+            className="shrink-0 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium hover:border-rose hover:text-rose-deep"
+          >
+            Болих ✕
+          </button>
+        </div>
+      )}
 
       {/* Category chips */}
       <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto pb-1">
@@ -166,11 +263,14 @@ export function ShopClient({
           {list.length} бүтээгдэхүүн
         </span>
         <div className="flex items-center gap-2 text-sm">
-          <span className="hidden text-muted sm:inline">Эрэмбэлэх:</span>
+          <span className="hidden text-muted sm:inline">
+            {colorHex ? "Өнгөөр эрэмбэлсэн" : "Эрэмбэлэх:"}
+          </span>
           <select
-            value={sort}
+            value={colorHex ? "featured" : sort}
+            disabled={!!colorHex}
             onChange={(e) => setSort(e.target.value as Sort)}
-            className="rounded-full border border-line bg-surface px-4 py-2 text-sm focus:border-rose focus:outline-none"
+            className="rounded-full border border-line bg-surface px-4 py-2 text-sm focus:border-rose focus:outline-none disabled:opacity-50"
           >
             <option value="featured">Онцлох</option>
             <option value="price-asc">Үнэ: багаас их</option>

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MNT } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { dominantColorFromFile } from "@/lib/color";
 import { Logo } from "./Logo";
 
 export type MenuCategory = {
@@ -68,6 +69,23 @@ export function Header({
         )
         .slice(0, 6)
     : [];
+
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageBusy, setImageBusy] = useState(false);
+  const pickImage = async (file: File | undefined) => {
+    if (!file) return;
+    setImageBusy(true);
+    try {
+      const hex = await dominantColorFromFile(file);
+      router.push(`/shop?color=${hex.replace(/^#/, "")}`);
+      closeSearch();
+    } catch {
+      /* ignore unreadable image */
+    } finally {
+      setImageBusy(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    }
+  };
 
   const closeSearch = () => {
     setSearchOpen(false);
@@ -258,6 +276,31 @@ export function Header({
                 />
                 <button
                   type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={imageBusy}
+                  title="Зургаар (өнгөөр) хайх"
+                  aria-label="Зургаар хайх"
+                  className="grid h-9 w-9 place-items-center rounded-full text-foreground/70 hover:bg-blush disabled:opacity-50"
+                >
+                  {imageBusy ? (
+                    "…"
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
+                      <circle cx="8.5" cy="10" r="1.6" fill="currentColor" />
+                      <path d="M4 17l5-4 4 3 3-2 4 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => pickImage(e.target.files?.[0])}
+                />
+                <button
+                  type="button"
                   onClick={closeSearch}
                   aria-label="Хаах"
                   className="grid h-9 w-9 place-items-center rounded-full text-foreground/70 hover:bg-blush"
@@ -265,6 +308,10 @@ export function Header({
                   <CloseIcon />
                 </button>
               </form>
+              <p className="mt-2 pl-8 text-xs text-muted">
+                Текстээр хайх, эсвэл 🖼 товчоор зураг оруулж өнгөөр нь ойролцоо
+                бүтээгдэхүүн олох
+              </p>
 
               {query && (
                 <div className="mt-4 border-t border-line pt-3">
