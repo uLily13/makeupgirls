@@ -46,9 +46,22 @@ export function HeroBanner({
           className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{ transform: `translateX(-${active * 100}%)` }}
         >
-          {list.map((s) => (
+          {list.map((s) => {
+          const media = !!(s.video || s.image);
+          return (
             <div key={s.id} className="relative h-full w-full shrink-0">
-              {s.image ? (
+              {s.video ? (
+                <video
+                  src={s.video}
+                  poster={s.image || undefined}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : s.image ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -66,7 +79,7 @@ export function HeroBanner({
               <div className="absolute inset-0">
                 <div
                   className={`wrap flex h-full flex-col gap-5 ${
-                    s.image
+                    media
                       ? "justify-end pb-14 text-white md:pb-20"
                       : "justify-center text-foreground"
                   }`}
@@ -79,11 +92,11 @@ export function HeroBanner({
                   {(s.title || s.titleAccent) && (
                     <h1
                       className={`max-w-xl font-display text-4xl leading-[1.05] md:text-6xl lg:text-7xl ${
-                        s.image ? "[text-shadow:0_2px_18px_rgba(0,0,0,0.55)]" : ""
+                        media ? "[text-shadow:0_2px_18px_rgba(0,0,0,0.55)]" : ""
                       }`}
                     >
                       {s.title}{" "}
-                      <span className={s.image ? "text-rose" : "text-rose-deep"}>
+                      <span className={media ? "text-rose" : "text-rose-deep"}>
                         {s.titleAccent}
                       </span>
                     </h1>
@@ -91,7 +104,7 @@ export function HeroBanner({
                   {s.subtitle && (
                     <p
                       className={`max-w-md text-sm leading-relaxed md:text-[15px] ${
-                        s.image
+                        media
                           ? "text-white/90 [text-shadow:0_1px_10px_rgba(0,0,0,0.5)]"
                           : "text-foreground/70"
                       }`}
@@ -109,7 +122,7 @@ export function HeroBanner({
                     <Link
                       href="/shop?cat=sets"
                       className={`btn-liquid px-7 py-3.5 text-sm font-medium ${
-                        s.image
+                        media
                           ? "border border-white/70 text-white"
                           : "border border-foreground/25 text-foreground"
                       }`}
@@ -120,7 +133,8 @@ export function HeroBanner({
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
 
         {/* Arrows + dots (only when there's more than one slide) */}

@@ -145,3 +145,72 @@ export function SingleImageUploader({
     </>
   );
 }
+
+/** Single-video uploader — for a hero background clip (mp4 / webm). */
+export function SingleVideoUploader({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (url: string | undefined) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    try {
+      onChange(await upload(file));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Алдаа гарлаа");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div>
+      {value ? (
+        <div className="group relative h-28 w-44 overflow-hidden rounded-xl border border-line bg-black">
+          <video
+            src={value}
+            muted
+            loop
+            autoPlay
+            playsInline
+            className="h-full w-full object-cover"
+          />
+          <button
+            type="button"
+            onClick={() => onChange(undefined)}
+            className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-xs text-white hover:bg-black/80"
+            title="Бичлэг устгах"
+          >
+            ✕
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={busy}
+          className="grid h-28 w-44 place-items-center rounded-xl border border-dashed border-line text-sm text-muted hover:border-rose hover:text-rose-deep disabled:opacity-50"
+        >
+          {busy ? "Ачаалж байна…" : "🎬 Бичлэг оруулах"}
+        </button>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime,video/ogg"
+        hidden
+        onChange={(e) => handleFile(e.target.files?.[0])}
+      />
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}

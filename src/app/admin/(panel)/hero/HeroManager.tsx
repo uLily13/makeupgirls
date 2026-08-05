@@ -3,7 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { HeroSlide } from "@/lib/products";
-import { SingleImageUploader } from "@/components/admin/ImageUploader";
+import {
+  SingleImageUploader,
+  SingleVideoUploader,
+} from "@/components/admin/ImageUploader";
 import { saveHeroSlides } from "../actions";
 
 const newSlide = (): HeroSlide => ({
@@ -12,6 +15,7 @@ const newSlide = (): HeroSlide => ({
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.round(Math.random() * 1e6)}`,
   image: "",
+  video: "",
   badge: "",
   title: "",
   titleAccent: "",
@@ -106,16 +110,31 @@ export function HeroManager({ slides: initial }: { slides: HeroSlide[] }) {
               </div>
 
               <div className="flex flex-col gap-4 md:flex-row">
-                {/* Image */}
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-medium text-muted">
-                    Зураг (заавал биш)
-                  </span>
-                  <SingleImageUploader
-                    size="lg"
-                    value={s.image || undefined}
-                    onChange={(url) => patch(s.id, { image: url ?? "" })}
-                  />
+                {/* Media (image + optional video) */}
+                <div className="flex flex-col gap-4 sm:flex-row md:flex-col">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-medium text-muted">
+                      Зураг (заавал биш)
+                    </span>
+                    <SingleImageUploader
+                      size="lg"
+                      value={s.image || undefined}
+                      onChange={(url) => patch(s.id, { image: url ?? "" })}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-medium text-muted">
+                      Бичлэг (заавал биш)
+                    </span>
+                    <SingleVideoUploader
+                      value={s.video || undefined}
+                      onChange={(url) => patch(s.id, { video: url ?? "" })}
+                    />
+                    <span className="max-w-44 text-[11px] leading-tight text-muted">
+                      Бичлэг тавивал зураг дээр давуу, автоматаар (дуугүй)
+                      тоглоно. Зургийг «cover» болгож ашиглана.
+                    </span>
+                  </div>
                 </div>
 
                 {/* Text fields */}

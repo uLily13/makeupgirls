@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { ProductCard } from "./ProductCard";
+import { AutoScroller } from "./AutoScroller";
 
 // "Choose Your Faves"-style tabbed section: switch between best sellers and
 // bundles (Judydoll layout — centred title, underline tabs, product grid).
@@ -52,11 +53,16 @@ export function FavesTabs({
       </div>
 
       {list.length > 0 ? (
-        <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-4 md:gap-7 xl:grid-cols-5">
+        <AutoScroller className="no-scrollbar -mx-4 flex snap-x gap-x-5 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
           {list.map((p) => (
-            <ProductCard key={p.slug} product={p} />
+            <div
+              key={p.slug}
+              className="w-44 shrink-0 snap-start sm:w-52 md:w-56 xl:w-60"
+            >
+              <ProductCard product={p} />
+            </div>
           ))}
-        </div>
+        </AutoScroller>
       ) : (
         <p className="py-10 text-center text-muted">Удахгүй нэмэгдэнэ ✦</p>
       )}

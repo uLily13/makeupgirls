@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NewsletterForm } from "./NewsletterForm";
+import { Logo } from "./Logo";
 
 export function Footer({
   content,
@@ -11,23 +11,14 @@ export function Footer({
   return (
     <footer className="mt-24 border-t border-line bg-blush/40">
       <div className="wrap py-16 lg:py-20">
-        {/* Newsletter */}
-        <div className="mb-14 flex flex-col items-center gap-5 rounded-3xl bg-foreground px-6 py-12 text-center text-white">
-          <span className="text-xs uppercase tracking-[0.25em] text-white/60">
-            {c("news.eyebrow")}
-          </span>
-          <h3 className="font-display text-2xl md:text-3xl">{c("news.title")}</h3>
-          <NewsletterForm
-            placeholder={c("news.placeholder")}
-            cta={c("news.cta")}
-          />
-        </div>
-
         {/* Columns */}
         <div className="grid gap-10 md:grid-cols-3">
           <div className="md:col-span-1">
             <Link href="/" className="font-display text-2xl">
-              makeup<span className="text-rose">girls</span>
+              <Logo
+                imgClass="h-11 w-auto"
+                fallback={<>makeup<span className="text-rose">girls</span></>}
+              />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
               {c("footer.about")}
@@ -82,8 +73,12 @@ export function Footer({
         <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-line pt-6 text-xs text-muted md:flex-row">
           <span>© {new Date().getFullYear()} makeupgirls. Бүх эрх хуулиар хамгаалагдсан.</span>
           <div className="flex gap-5">
-            <span>Нууцлалын бодлого</span>
-            <span>Үйлчилгээний нөхцөл</span>
+            <Link href="/privacy" className="hover:text-rose">
+              Нууцлалын бодлого
+            </Link>
+            <Link href="/terms" className="hover:text-rose">
+              Үйлчилгээний нөхцөл
+            </Link>
           </div>
         </div>
       </div>

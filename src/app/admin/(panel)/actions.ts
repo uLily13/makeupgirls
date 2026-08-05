@@ -329,13 +329,16 @@ export async function saveHeroSlides(slides: HeroSlide[]) {
     .map((s) => ({
       id: s.id || randomUUID(),
       image: s.image ?? "",
+      video: s.video || undefined,
       badge: (s.badge ?? "").trim(),
       title: (s.title ?? "").trim(),
       titleAccent: (s.titleAccent ?? "").trim(),
       subtitle: (s.subtitle ?? "").trim(),
     }))
-    // Drop fully-empty slides (no image and no text).
-    .filter((s) => s.image || s.title || s.titleAccent || s.subtitle || s.badge);
+    // Drop fully-empty slides (no media and no text).
+    .filter(
+      (s) => s.image || s.video || s.title || s.titleAccent || s.subtitle || s.badge
+    );
   await saveStore(store);
   refresh();
 }

@@ -46,14 +46,6 @@ export const seedContent: Omit<ContentItem, "history">[] = [
   { key: "vp2.d", group: "Нүүр — Давуу тал", label: "2 — тайлбар", value: "Албан ёсны дистрибьютер" },
   { key: "vp3.t", group: "Нүүр — Давуу тал", label: "3 — гарчиг", value: "Амар төлбөр" },
   { key: "vp3.d", group: "Нүүр — Давуу тал", label: "3 — тайлбар", value: "QPay, карт, бэлнээр" },
-  { key: "vp4.t", group: "Нүүр — Давуу тал", label: "4 — гарчиг", value: "Хялбар буцаалт" },
-  { key: "vp4.d", group: "Нүүр — Давуу тал", label: "4 — тайлбар", value: "14 хоногийн баталгаа" },
-
-  // Newsletter
-  { key: "news.eyebrow", group: "Footer — Newsletter", label: "Жижиг гарчиг", value: "Гоо сайхны клуб" },
-  { key: "news.title", group: "Footer — Newsletter", label: "Гарчиг", value: "Шинэ бүтээгдэхүүн, онцгой хямдралыг хамгийн түрүүнд аваарай" },
-  { key: "news.placeholder", group: "Footer — Newsletter", label: "Оролтын текст", value: "И-мэйл хаягаа оруулна уу" },
-  { key: "news.cta", group: "Footer — Newsletter", label: "Товч", value: "Бүртгүүлэх" },
 
   // Footer
   { key: "footer.about", group: "Footer", label: "Тухай", value: "Монголын залуу охидод зориулсан, орчин үеийн цэвэрхэн гоо сайхны дэлгүүр. 100% жинхэнэ бүтээгдэхүүн.", multiline: true },

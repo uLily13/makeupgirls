@@ -4,6 +4,7 @@ import { FavesTabs } from "@/components/FavesTabs";
 import { TrendingSocial } from "@/components/TrendingSocial";
 import { ProductCard } from "@/components/ProductCard";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { AutoScroller } from "@/components/AutoScroller";
 import { getStore, resolveContent, visibleCategories, withRatings } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -44,8 +45,11 @@ export default async function Home() {
 
       {/* Categories (below the faves section) */}
       <SectionBand bg={c("home.cat.bg")} base="bg-blush/60">
-        <SectionHead eyebrow={c("home.cat.eyebrow")} title={c("home.cat.title")} />
-        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
+        <CenterHead eyebrow={c("home.cat.eyebrow")} title={c("home.cat.title")} />
+        <AutoScroller
+          interval={4800}
+          className="no-scrollbar -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0"
+        >
           {cats.map((cat) => (
             <Link
               key={cat.slug}
@@ -78,21 +82,31 @@ export default async function Home() {
               </div>
             </Link>
           ))}
-        </div>
+        </AutoScroller>
+        <ViewAllButton />
       </SectionBand>
 
       {/* New arrivals */}
       {newArrivals.length > 0 && (
         <SectionBand bg={c("home.new.bg")}>
-          <SectionHead
+          <CenterHead
             eyebrow={c("home.new.eyebrow")}
             title={c("home.new.title")}
           />
-          <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-4 md:gap-7 xl:grid-cols-5">
+          <AutoScroller
+            interval={5200}
+            className="no-scrollbar -mx-4 flex snap-x gap-x-5 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0"
+          >
             {newArrivals.map((p) => (
-              <ProductCard key={p.slug} product={p} />
+              <div
+                key={p.slug}
+                className="w-44 shrink-0 snap-start sm:w-52 md:w-56 xl:w-60"
+              >
+                <ProductCard product={p} />
+              </div>
             ))}
-          </div>
+          </AutoScroller>
+          <ViewAllButton />
         </SectionBand>
       )}
 
@@ -104,12 +118,11 @@ export default async function Home() {
 
       {/* Value props */}
       <SectionBand bg={c("home.vp.bg")}>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { t: c("vp1.t"), d: c("vp1.d"), i: "🚚" },
             { t: c("vp2.t"), d: c("vp2.d"), i: "✓" },
             { t: c("vp3.t"), d: c("vp3.d"), i: "💳" },
-            { t: c("vp4.t"), d: c("vp4.d"), i: "↺" },
           ].map((v) => (
             <div
               key={v.t}
@@ -158,17 +171,31 @@ function SectionBand({
   );
 }
 
-function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
+// Centred section header (eyebrow + title with a rose underline accent) —
+// matches the "Онцлох бүтээгдэхүүн" (FavesTabs) look.
+function CenterHead({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
-    <div className="mb-9 flex items-end justify-between gap-4">
-      <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-rose-deep">
-          {eyebrow}
-        </p>
-        <h2 className="mt-1.5 font-display text-3xl md:text-4xl">{title}</h2>
-      </div>
-      <Link href="/shop" className="link-underline shrink-0 text-sm font-medium">
-        Бүгдийг үзэх →
+    <div className="mb-9 text-center">
+      <p className="text-xs uppercase tracking-[0.2em] text-rose-deep">
+        {eyebrow}
+      </p>
+      <h2 className="relative mt-1.5 inline-block font-display text-3xl md:text-4xl">
+        {title}
+        <span className="absolute -bottom-2 left-1/2 h-1 w-16 -translate-x-1/2 rounded-full bg-rose" />
+      </h2>
+    </div>
+  );
+}
+
+// Centred "view all" button below a section — matches the FavesTabs button.
+function ViewAllButton({ href = "/shop" }: { href?: string }) {
+  return (
+    <div className="mt-12 text-center">
+      <Link
+        href={href}
+        className="btn-liquid inline-block bg-foreground px-9 py-3.5 text-sm font-medium text-white"
+      >
+        Бүгдийг үзэх
       </Link>
     </div>
   );

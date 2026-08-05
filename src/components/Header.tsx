@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
+import { Logo } from "./Logo";
 
 export type MenuCategory = {
   slug: string;
@@ -123,7 +124,10 @@ export function Header({
             href="/"
             className="font-display text-2xl tracking-tight lg:text-[26px]"
           >
-            makeup<span className="text-rose-deep">girls</span>
+            <Logo
+              imgClass="h-11 w-auto lg:h-14"
+              fallback={<>makeup<span className="text-rose-deep">girls</span></>}
+            />
           </Link>
 
           <div className="flex flex-1 items-center justify-end gap-3">
@@ -196,7 +200,10 @@ export function Header({
           <div className="card flex h-full w-full flex-col">
             <div className="flex items-center justify-between px-6 py-5">
               <span className="font-display text-xl">
-                makeup<span className="text-rose-deep">girls</span>
+                <Logo
+                  imgClass="h-8 w-auto"
+                  fallback={<>makeup<span className="text-rose-deep">girls</span></>}
+                />
               </span>
               <button onClick={closeMenu} aria-label="Хаах">
                 <CloseIcon />

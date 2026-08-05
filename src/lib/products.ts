@@ -104,6 +104,7 @@ export type Feedback = {
 export type HeroSlide = {
   id: string;
   image: string; // full-bleed banner image (empty = coral gradient)
+  video?: string; // optional full-bleed background video (autoplays, takes priority over image)
   badge: string;
   title: string;
   titleAccent: string; // coloured second part of the title

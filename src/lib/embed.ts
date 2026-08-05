@@ -57,3 +57,28 @@ export const PLATFORM_LABEL: Record<EmbedPlatform, string> = {
   tiktok: "TikTok",
   youtube: "YouTube",
 };
+
+// Build the iframe src for inline playback. With `autoplay`, the clip starts
+// muted and loops so it behaves like a social feed (browsers only allow
+// autoplay when muted). Instagram's embed has no autoplay params, so it shows
+// its own play button — still inline, no separate modal.
+export function embedPlayerSrc(
+  p: ParsedEmbed,
+  { autoplay = false }: { autoplay?: boolean } = {}
+): string {
+  switch (p.platform) {
+    case "youtube":
+      return (
+        `https://www.youtube.com/embed/${p.id}?rel=0&modestbranding=1&playsinline=1` +
+        (autoplay ? `&autoplay=1&mute=1&loop=1&playlist=${p.id}` : "")
+      );
+    case "tiktok":
+      return (
+        `https://www.tiktok.com/embed/v2/${p.id}` +
+        (autoplay ? `?autoplay=1&muted=1` : "")
+      );
+    case "instagram":
+    default:
+      return p.embedUrl;
+  }
+}

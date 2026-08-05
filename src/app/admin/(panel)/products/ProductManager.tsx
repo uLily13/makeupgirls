@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MNT, type Product, type Category, type Subcategory } from "@/lib/products";
 import { ImageUploader, SingleImageUploader } from "@/components/admin/ImageUploader";
@@ -53,6 +53,47 @@ export function ProductManager({
   const [isNew, setIsNew] = useState(false);
   const [promoFor, setPromoFor] = useState<string | null>(null);
   const [promoPrice, setPromoPrice] = useState("");
+
+  // Search & filters
+  const [query, setQuery] = useState("");
+  const [catFilter, setCatFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "hidden" | "sale" | "out" | "bundle"
+  >("all");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return products.filter((p) => {
+      if (q) {
+        const hay = `${p.name} ${p.brand} ${p.slug}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (catFilter !== "all" && p.category !== catFilter) return false;
+      const onSale = !!p.oldPrice && p.oldPrice > p.price;
+      switch (statusFilter) {
+        case "active":
+          return !p.hidden;
+        case "hidden":
+          return !!p.hidden;
+        case "sale":
+          return onSale;
+        case "out":
+          return (p.stock ?? 0) <= 0;
+        case "bundle":
+          return !!p.bundle;
+        default:
+          return true;
+      }
+    });
+  }, [products, query, catFilter, statusFilter]);
+
+  const hasFilters =
+    query.trim() !== "" || catFilter !== "all" || statusFilter !== "all";
+  const clearFilters = () => {
+    setQuery("");
+    setCatFilter("all");
+    setStatusFilter("all");
+  };
 
   const run = (fn: () => Promise<void>) =>
     startTransition(async () => {
@@ -114,7 +155,11 @@ export function ProductManager({
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl">Бүтээгдэхүүн</h1>
-          <p className="mt-1 text-muted">{products.length} бүтээгдэхүүн</p>
+          <p className="mt-1 text-muted">
+            {hasFilters
+              ? `${filtered.length} / ${products.length} бүтээгдэхүүн`
+              : `${products.length} бүтээгдэхүүн`}
+          </p>
         </div>
         <button
           onClick={openNew}
@@ -122,6 +167,55 @@ export function ProductManager({
         >
           + Шинэ бүтээгдэхүүн
         </button>
+      </div>
+
+      {/* Search & filters */}
+      <div className="mb-4 flex flex-wrap items-center gap-2.5">
+        <div className="relative min-w-[220px] flex-1">
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
+            ⌕
+          </span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Нэр, брэнд, slug-аар хайх…"
+            className="w-full rounded-xl border border-line py-2.5 pl-9 pr-3.5 text-sm focus:border-rose focus:outline-none"
+          />
+        </div>
+        <select
+          value={catFilter}
+          onChange={(e) => setCatFilter(e.target.value)}
+          className={filterCls}
+        >
+          <option value="all">Бүх ангилал</option>
+          {categories.map((c) => (
+            <option key={c.slug} value={c.slug}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as typeof statusFilter)
+          }
+          className={filterCls}
+        >
+          <option value="all">Бүх төлөв</option>
+          <option value="active">Идэвхтэй</option>
+          <option value="hidden">Нуусан</option>
+          <option value="sale">Урамшуулалтай</option>
+          <option value="out">Дууссан</option>
+          <option value="bundle">Багц</option>
+        </select>
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="rounded-xl border border-line px-3.5 py-2.5 text-sm text-muted hover:border-rose hover:text-rose-deep"
+          >
+            Цэвэрлэх ✕
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -137,7 +231,16 @@ export function ProductManager({
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => {
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-14 text-center text-muted">
+                  {products.length === 0
+                    ? "Бүтээгдэхүүн алга байна."
+                    : "Хайлт / шүүлтэд тохирох бүтээгдэхүүн олдсонгүй."}
+                </td>
+              </tr>
+            )}
+            {filtered.map((p) => {
               const onSale = p.oldPrice && p.oldPrice > p.price;
               return (
                 <tr key={p.slug} className="border-b border-line last:border-0">
@@ -539,6 +642,9 @@ export function ProductManager({
 
 const inputCls =
   "w-full rounded-xl border border-line px-3.5 py-2.5 text-sm focus:border-rose focus:outline-none";
+
+const filterCls =
+  "rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-foreground/80 focus:border-rose focus:outline-none";
 
 function Field({
   label,

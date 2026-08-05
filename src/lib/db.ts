@@ -168,6 +168,14 @@ const OBSOLETE_TRENDING_KEYS = new Set([
   "trending.4", "trending.5", "trending.6",
 ]);
 
+// Newsletter ("Гоо сайхны клуб") content keys — the footer section was removed.
+const OBSOLETE_NEWS_KEYS = new Set([
+  "news.eyebrow", "news.title", "news.placeholder", "news.cta",
+]);
+
+// "Хялбар буцаалт" value-prop card — removed from the home page.
+const OBSOLETE_VP_KEYS = new Set(["vp4.t", "vp4.d"]);
+
 /** Read the whole store, seeding on first run and back-filling new fields. */
 export async function getStore(): Promise<Store> {
   await ensureTable();
@@ -234,7 +242,11 @@ export async function getStore(): Promise<Store> {
   // Drop obsolete hero/trending content keys (replaced by array fields).
   const beforeLen = store.content.length;
   store.content = store.content.filter(
-    (c) => !OBSOLETE_HERO_KEYS.has(c.key) && !OBSOLETE_TRENDING_KEYS.has(c.key)
+    (c) =>
+      !OBSOLETE_HERO_KEYS.has(c.key) &&
+      !OBSOLETE_TRENDING_KEYS.has(c.key) &&
+      !OBSOLETE_NEWS_KEYS.has(c.key) &&
+      !OBSOLETE_VP_KEYS.has(c.key)
   );
   if (store.content.length !== beforeLen) changed = true;
   for (const u of store.users) {

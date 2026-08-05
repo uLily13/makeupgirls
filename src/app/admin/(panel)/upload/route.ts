@@ -4,8 +4,10 @@ import { saveAsset } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
-const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
+const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/quicktime", "video/ogg"];
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -18,11 +20,19 @@ export async function POST(req: Request) {
   if (!(file instanceof File)) {
     return Response.json({ error: "Файл олдсонгүй." }, { status: 400 });
   }
-  if (!ALLOWED.includes(file.type)) {
-    return Response.json({ error: "Зөвхөн зураг оруулна уу." }, { status: 400 });
+  const isImage = ALLOWED_IMAGE.includes(file.type);
+  const isVideo = ALLOWED_VIDEO.includes(file.type);
+  if (!isImage && !isVideo) {
+    return Response.json(
+      { error: "Зөвхөн зураг эсвэл бичлэг (mp4, webm) оруулна уу." },
+      { status: 400 }
+    );
   }
-  if (file.size > MAX_BYTES) {
+  if (isImage && file.size > MAX_IMAGE_BYTES) {
     return Response.json({ error: "Зураг 5MB-ээс бага байх ёстой." }, { status: 400 });
+  }
+  if (isVideo && file.size > MAX_VIDEO_BYTES) {
+    return Response.json({ error: "Бичлэг 50MB-ээс бага байх ёстой." }, { status: 400 });
   }
 
   const buf = Buffer.from(await file.arrayBuffer());
