@@ -2,11 +2,13 @@ import { CartProvider } from "@/lib/cart";
 import { FavoritesProvider } from "@/lib/favorites";
 import { QuickViewProvider } from "@/lib/quickview";
 import { BadgeSettingsProvider } from "@/lib/badgeSettings";
-import { defaultBadgeSettings } from "@/lib/products";
+import { defaultBadgeSettings, MNT } from "@/lib/products";
+import { isPromoLive } from "@/lib/promotions";
 import { Header, type MenuCategory } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { QuickView } from "@/components/QuickView";
+import { PromoBanner } from "@/components/PromoBanner";
 import { LiquidBackground } from "@/components/LiquidBackground";
 import {
   getStore,
@@ -47,6 +49,19 @@ export default async function StoreLayout({
     content["announce.4"],
   ].filter(Boolean);
 
+  // Site-wide campaign banner (e.g. Black Friday) — the first live promo that
+  // has the banner flag turned on.
+  const bannerPromo = store.promotions.find((p) => p.banner && isPromoLive(p));
+  const bannerLabel = !bannerPromo
+    ? ""
+    : bannerPromo.type === "percent"
+      ? `${bannerPromo.productSlugs.length === 0 ? "Бүх бараа " : ""}-${bannerPromo.value ?? 0}%`
+      : bannerPromo.type === "amount"
+        ? `-${MNT(bannerPromo.value ?? 0)}`
+        : bannerPromo.type === "spend_amount"
+          ? `${MNT(bannerPromo.threshold ?? 0)}-с дээш → -${MNT(bannerPromo.value ?? 0)}`
+          : "Онцгой урамшуулал";
+
   const searchItems = visibleProducts(store).map((p) => ({
     slug: p.slug,
     name: p.name,
@@ -70,6 +85,14 @@ export default async function StoreLayout({
               favCount={user?.favorites?.length ?? 0}
               searchItems={searchItems}
             />
+            {bannerPromo && (
+              <PromoBanner
+                title={bannerPromo.title}
+                discountLabel={bannerLabel}
+                endsAt={bannerPromo.endsAt || undefined}
+                color={bannerPromo.bannerColor || "#171717"}
+              />
+            )}
             <main className="flex-1">{children}</main>
             <Footer content={content} />
             <CartDrawer />

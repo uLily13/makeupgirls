@@ -11,6 +11,7 @@ import {
   type BadgeType,
 } from "@/lib/products";
 import { ImageUploader, SingleImageUploader } from "@/components/admin/ImageUploader";
+import { NumberField } from "@/components/admin/NumberField";
 import {
   saveProduct,
   deleteProduct,
@@ -39,6 +40,8 @@ const empty = (): FormState => ({
   usage: "",
   badges: [],
   bundle: false,
+  code: "",
+  barcode: "",
   short: "",
   description: "",
   ingredientsText: "",
@@ -59,7 +62,7 @@ export function ProductManager({
   const [form, setForm] = useState<FormState | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [promoFor, setPromoFor] = useState<string | null>(null);
-  const [promoPrice, setPromoPrice] = useState("");
+  const [promoPrice, setPromoPrice] = useState(0);
 
   // Search & filters
   const [query, setQuery] = useState("");
@@ -72,7 +75,7 @@ export function ProductManager({
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
       if (q) {
-        const hay = `${p.name} ${p.brand} ${p.slug}`.toLowerCase();
+        const hay = `${p.name} ${p.brand} ${p.slug} ${p.code ?? ""} ${p.barcode ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       if (catFilter !== "all" && p.category !== catFilter) return false;
@@ -125,6 +128,8 @@ export function ProductManager({
       usage: p.usage ?? "",
       badges: p.badges ?? (p.badge ? [p.badge] : []),
       bundle: p.bundle ?? false,
+      code: p.code ?? "",
+      barcode: p.barcode ?? "",
       short: p.short,
       description: p.description,
       ingredientsText: (p.ingredients ?? []).join(", "),
@@ -335,10 +340,9 @@ export function ProductManager({
           <p className="mt-1 text-sm text-muted">
             Хямдруулсан үнээ оруулна уу. Хуучин үнэ compare-at болж хадгалагдана.
           </p>
-          <input
-            type="number"
+          <NumberField
             value={promoPrice}
-            onChange={(e) => setPromoPrice(e.target.value)}
+            onChange={setPromoPrice}
             placeholder="Шинэ үнэ (₮)"
             className="mt-4 w-full rounded-xl border border-line px-4 py-2.5 focus:border-rose focus:outline-none"
           />
@@ -350,10 +354,10 @@ export function ProductManager({
               Болих
             </button>
             <button
-              disabled={pending || !promoPrice}
+              disabled={pending || promoPrice <= 0}
               onClick={() =>
                 run(async () => {
-                  await startPromotion(promoFor, Number(promoPrice));
+                  await startPromotion(promoFor, promoPrice);
                   setPromoFor(null);
                 })
               }
@@ -506,43 +510,23 @@ export function ProductManager({
               </select>
             </Field>
             <Field label="Үнэ (₮)">
-              <input
-                type="number"
-                value={form.price || ""}
-                placeholder="0"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    price: e.target.value === "" ? 0 : Number(e.target.value),
-                  })
-                }
+              <NumberField
+                value={form.price}
+                onChange={(n) => setForm({ ...form, price: n })}
                 className={inputCls}
               />
             </Field>
             <Field label="Хуучин үнэ (compare-at, заавал биш)">
-              <input
-                type="number"
-                value={form.oldPrice ?? ""}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    oldPrice: e.target.value ? Number(e.target.value) : null,
-                  })
-                }
+              <NumberField
+                value={form.oldPrice ?? 0}
+                onChange={(n) => setForm({ ...form, oldPrice: n === 0 ? null : n })}
                 className={inputCls}
               />
             </Field>
             <Field label="Үлдэгдэл (ширхэг)">
-              <input
-                type="number"
-                value={form.stock || ""}
-                placeholder="0"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    stock: e.target.value === "" ? 0 : Number(e.target.value),
-                  })
-                }
+              <NumberField
+                value={form.stock}
+                onChange={(n) => setForm({ ...form, stock: n })}
                 className={inputCls}
               />
             </Field>
@@ -605,6 +589,23 @@ export function ProductManager({
                 </span>
               </span>
             </label>
+            <Field label="Бүтээгдэхүүний код (SKU)">
+              <input
+                value={form.code ?? ""}
+                onChange={(e) => setForm({ ...form, code: e.target.value })}
+                placeholder="Жишээ: MG-0012"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Баркод (barcode)">
+              <input
+                value={form.barcode ?? ""}
+                onChange={(e) => setForm({ ...form, barcode: e.target.value })}
+                placeholder="Жишээ: 4820000000000"
+                inputMode="numeric"
+                className={inputCls}
+              />
+            </Field>
             <Field label="Богино тайлбар" full>
               <input
                 value={form.short}

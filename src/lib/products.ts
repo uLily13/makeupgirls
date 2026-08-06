@@ -64,6 +64,8 @@ export type Product = {
   badge?: BadgeType; // legacy single badge — superseded by `badges`
   badges?: BadgeType[]; // one or more badges (Шинэ / Хит / Хямдрал)
   bundle?: boolean; // marketed as a bundle / value set (shown in the "Багц" tab)
+  code?: string; // internal product code / SKU
+  barcode?: string; // barcode (EAN/UPC etc.)
   short: string;
   description: string;
   ingredients: string[];
@@ -88,8 +90,14 @@ export type Review = {
 export type PromotionType =
   | "percent" // %-ийн хөнгөлөлт
   | "amount" // мөнгөн дүнгийн хөнгөлөлт
-  | "bogo" // N авбал M үнэгүй (1+1)
-  | "gift"; // A бүтээгдэхүүн авбал B үнэгүй дагалдана
+  | "bogo" // N авбал M үнэгүй (1+N)
+  | "gift" // A бүтээгдэхүүн авбал B, C… үнэгүй дагалдана
+  | "spend_amount" // N₮-с дээш худалдан авалтад N₮ хөнгөлөлт
+  | "spend_gift" // N₮-с дээш худалдан авалтад бэлэг дагалдана
+  | "nth_discount"; // N авбал (N+1) дэх нь %-аар хямдарна
+
+// A single free/gift product line (product + quantity).
+export type GiftItem = { slug: string; qty: number };
 
 export type Promotion = {
   id: string;
@@ -98,11 +106,28 @@ export type Promotion = {
   active: boolean;
   productSlugs: string[]; // бүтээгдэхүүнүүд (хамрах хүрээ)
   value?: number; // percent (0–100) эсвэл amount (₮)
-  buyQty?: number; // bogo: хэдэн авбал
+  buyQty?: number; // bogo/nth: хэдэн авбал
   freeQty?: number; // bogo: хэдэн үнэгүй
-  giftSlug?: string; // gift: дагалдах бүтээгдэхүүн
-  minQty?: number; // gift: доод тоо
+  gifts?: GiftItem[]; // gift/spend_gift: дагалдах бүтээгдэхүүнүүд
+  giftSlug?: string; // legacy — нэг бэлэг (gifts руу шилжсэн)
+  minQty?: number; // gift: доод тоо (A-г хэдэн авбал)
+  threshold?: number; // spend_amount/spend_gift: доод дүн (₮)
+  startsAt?: string; // эхлэх огноо (YYYY-MM-DD, заавал биш)
+  endsAt?: string; // дуусах огноо (YYYY-MM-DD, заавал биш)
+  banner?: boolean; // Black Friday маягийн — сайт даяар баннер харуулах
+  bannerColor?: string; // баннерын дэвсгэр өнгө (hex)
   createdAt: string;
+};
+
+// -------- Homepage entry popup (carousel of promo slides) --------
+
+export type PopupSlide = {
+  id: string;
+  image: string; // optional banner image
+  title: string;
+  subtitle: string;
+  link: string; // optional CTA link
+  linkLabel: string; // optional CTA label
 };
 
 // -------- Feedback / contact messages --------
@@ -247,6 +272,7 @@ export type Store = {
   heroSlides: HeroSlide[];
   trendingPosts: TrendingPost[];
   badgeSettings?: BadgeSettings;
+  popupSlides?: PopupSlide[];
   updatedAt: string;
 };
 

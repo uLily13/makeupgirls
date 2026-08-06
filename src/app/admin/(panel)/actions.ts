@@ -14,6 +14,7 @@ import type {
   TrendingPost,
   BadgeType,
   BadgeSettings,
+  PopupSlide,
 } from "@/lib/products";
 
 // NOTE: These are public POST endpoints. Before production, gate every action
@@ -43,6 +44,8 @@ export type ProductInput = {
   usage: string;
   badges?: BadgeType[];
   bundle?: boolean;
+  code?: string;
+  barcode?: string;
   short: string;
   description: string;
   ingredients?: string[];
@@ -76,6 +79,8 @@ export async function saveProduct(input: ProductInput) {
       badges,
       badge: badges[0],
       bundle: input.bundle ?? false,
+      code: input.code?.trim() || undefined,
+      barcode: input.barcode?.trim() || undefined,
       short: input.short,
       description: input.description,
       ingredients: input.ingredients ?? [],
@@ -104,6 +109,8 @@ export async function saveProduct(input: ProductInput) {
       badges,
       badge: badges[0],
       bundle: input.bundle ?? false,
+      code: input.code?.trim() || undefined,
+      barcode: input.barcode?.trim() || undefined,
       short: input.short,
       description: input.description,
       ingredients: input.ingredients ?? p.ingredients,
@@ -388,6 +395,24 @@ export async function saveBadgeSettings(settings: BadgeSettings) {
     Шинэ: clean(settings.Шинэ, "#059669"),
     Хямдрал: clean(settings.Хямдрал, "#c56a5b"),
   };
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ HOMEPAGE POPUP ============================
+
+export async function savePopupSlides(slides: PopupSlide[]) {
+  const store = await getStore();
+  store.popupSlides = slides
+    .map((s) => ({
+      id: s.id || randomUUID(),
+      image: s.image ?? "",
+      title: (s.title ?? "").trim(),
+      subtitle: (s.subtitle ?? "").trim(),
+      link: (s.link ?? "").trim(),
+      linkLabel: (s.linkLabel ?? "").trim(),
+    }))
+    .filter((s) => s.image || s.title || s.subtitle);
   await saveStore(store);
   refresh();
 }

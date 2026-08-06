@@ -5,6 +5,7 @@ import { TrendingSocial } from "@/components/TrendingSocial";
 import { ProductCard } from "@/components/ProductCard";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { AutoScroller } from "@/components/AutoScroller";
+import { PopupCarousel } from "@/components/PopupCarousel";
 import { getStore, resolveContent, visibleCategories, withRatings } from "@/lib/db";
 import { productBadges } from "@/lib/products";
 
@@ -38,6 +39,9 @@ export default async function Home() {
 
   return (
     <>
+      {/* Entry popup (admin-configured) */}
+      <PopupCarousel slides={store.popupSlides ?? []} />
+
       {/* Large full-bleed hero carousel */}
       <HeroBanner
         slides={store.heroSlides ?? []}

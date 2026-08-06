@@ -160,6 +160,7 @@ function buildSeed(): Store {
     heroSlides: defaultHeroSlides(),
     trendingPosts: [],
     badgeSettings: { ...defaultBadgeSettings },
+    popupSlides: [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -204,6 +205,7 @@ export async function getStore(): Promise<Store> {
   if (!store.promotions) { store.promotions = []; changed = true; }
   if (!store.feedback) { store.feedback = []; changed = true; }
   if (!store.subscribers) { store.subscribers = []; changed = true; }
+  if (!store.popupSlides) { store.popupSlides = []; changed = true; }
   if (!store.badgeSettings) {
     store.badgeSettings = { ...defaultBadgeSettings };
     changed = true;
