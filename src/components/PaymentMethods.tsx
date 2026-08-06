@@ -46,16 +46,6 @@ const ICONS: Record<PaymentMethodId, { accent: string; icon: React.ReactNode }> 
       </svg>
     ),
   },
-  cash: {
-    accent: "#2e7d32",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-        <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" strokeWidth="1.7" />
-        <circle cx="12" cy="12" r="2.6" stroke="currentColor" strokeWidth="1.7" />
-        <path d="M6 9v6M18 9v6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      </svg>
-    ),
-  },
 };
 
 /** Selectable grid of payment methods. */

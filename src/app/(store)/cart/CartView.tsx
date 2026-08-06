@@ -185,7 +185,14 @@ export function CartView({
                     <span className="w-6 text-center text-sm">{it.qty}</span>
                     <button onClick={() => setQty(it.slug, it.qty + 1)} className="grid h-8 w-8 place-items-center text-muted hover:text-foreground">+</button>
                   </div>
-                  <button onClick={() => remove(it.slug)} className="text-xs text-muted underline hover:text-rose-deep">Хасах</button>
+                  <button
+                    onClick={() => remove(it.slug)}
+                    aria-label="Хасах"
+                    title="Хасах"
+                    className="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:bg-rose/10 hover:text-rose-deep"
+                  >
+                    <TrashIcon />
+                  </button>
                 </div>
               </div>
               <div className="text-right font-semibold">{MNT(it.price * it.qty)}</div>
@@ -249,10 +256,6 @@ export function CartView({
             </button>
           )}
 
-          <p className="mt-3 text-center text-xs text-muted">QPay · Голомт · Хаан банк · Бэлнээр</p>
-          <Link href="/shop" className="mt-4 block text-center text-xs text-muted underline">
-            Үргэлжлүүлэн худалдан авах
-          </Link>
         </aside>
       </div>
 
@@ -377,6 +380,17 @@ export function CartView({
         </div>
       )}
     </div>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M4 7h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
   );
 }
 

@@ -1,24 +1,14 @@
-"use client";
-
-import { useState } from "react";
-
-// "Гол найрлага" — shows a few ingredient pills by default and collapses the
-// rest behind a toggle so a long list doesn't flood the product page.
-const PREVIEW = 6;
-
+// "Гол найрлага" — a collapsible accordion (same look as "Хэрэглэх заавар"):
+// tap the header to expand the ingredient pills.
 export function IngredientList({ ingredients }: { ingredients: string[] }) {
-  const [open, setOpen] = useState(false);
-  const collapsible = ingredients.length > PREVIEW;
-  const shown = open || !collapsible ? ingredients : ingredients.slice(0, PREVIEW);
-  const hidden = ingredients.length - PREVIEW;
-
   return (
-    <div className="mt-10">
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+    <details className="group mt-6 rounded-2xl border border-line p-5">
+      <summary className="flex cursor-pointer items-center justify-between font-medium">
         Гол найрлага
-      </h3>
-      <div className="flex flex-wrap gap-2">
-        {shown.map((ing) => (
+        <span className="text-muted transition-transform group-open:rotate-180">⌄</span>
+      </summary>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {ingredients.map((ing) => (
           <span
             key={ing}
             className="rounded-full bg-blush px-4 py-2 text-sm text-rose-deep"
@@ -27,16 +17,6 @@ export function IngredientList({ ingredients }: { ingredients: string[] }) {
           </span>
         ))}
       </div>
-      {collapsible && (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-rose-deep hover:text-rose"
-        >
-          {open ? "Хураах" : `Бүгдийг харах (+${hidden})`}
-          <span className={`transition-transform ${open ? "rotate-180" : ""}`}>⌄</span>
-        </button>
-      )}
-    </div>
+    </details>
   );
 }

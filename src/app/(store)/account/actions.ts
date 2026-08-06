@@ -284,7 +284,7 @@ export async function placeOrder(input: {
     total: net + shipping,
     address,
     status: "Хүлээгдэж буй",
-    paymentMethod: (["qpay", "khan", "golomt", "card", "cash"].includes(
+    paymentMethod: (["qpay", "khan", "golomt", "card"].includes(
       input.paymentMethod ?? ""
     )
       ? input.paymentMethod

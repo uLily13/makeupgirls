@@ -211,7 +211,6 @@ export const PAYMENT_METHODS = [
   { id: "khan", label: "Хаан банк" },
   { id: "golomt", label: "Голомт банк" },
   { id: "card", label: "Картаар" },
-  { id: "cash", label: "Бэлнээр" },
 ] as const;
 
 export type PaymentMethodId = (typeof PAYMENT_METHODS)[number]["id"];

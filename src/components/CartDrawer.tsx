@@ -127,9 +127,16 @@ export function CartDrawer() {
                       </div>
                       <button
                         onClick={() => remove(it.slug)}
-                        className="text-xs text-muted underline hover:text-rose-deep"
+                        aria-label="Хасах"
+                        title="Хасах"
+                        className="grid h-7 w-7 place-items-center rounded-full text-muted transition-colors hover:bg-rose/10 hover:text-rose-deep"
                       >
-                        Хасах
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M4 7h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                          <path d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                          <path d="M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                        </svg>
                       </button>
                     </div>
                   </div>
