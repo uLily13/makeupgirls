@@ -1,16 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { MNT, type Product } from "@/lib/products";
+import { MNT, productBadges, type Product } from "@/lib/products";
 import { ProductVisual } from "./ProductVisual";
+import { ProductBadges } from "./ProductBadges";
 import { useFavorites } from "@/lib/favorites";
 import { useQuickView } from "@/lib/quickview";
-
-const badgeStyle: Record<string, string> = {
-  Шинэ: "text-foreground",
-  Хит: "text-rose-deep",
-  Хямдрал: "text-gold",
-};
 
 export function ProductCard({ product }: { product: Product }) {
   const { open: openQuickView } = useQuickView();
@@ -61,23 +56,10 @@ export function ProductCard({ product }: { product: Product }) {
         )}
 
         {/* badges */}
-        <div className="absolute left-3 top-3 flex flex-col items-start gap-1">
-          {product.badge && (
-            <span
-              className={`rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-[0_6px_16px_-8px_rgba(125,74,92,0.5)] ${
-                badgeStyle[product.badge]
-              }`}
-            >
-              {product.badge}
-            </span>
-          )}
-          {onSale && (
-            <span className="rounded-full bg-rose-deep px-2.5 py-1 text-[10px] font-semibold text-white">
-              -{discount}%
-            </span>
-          )}
+        <div className="absolute left-3 top-3">
+          <ProductBadges badges={productBadges(product)} discount={discount} />
           {soldOut && (
-            <span className="rounded-full bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold text-white">
+            <span className="mt-1 inline-block rounded-full bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold text-white">
               Дууссан
             </span>
           )}
@@ -90,10 +72,10 @@ export function ProductCard({ product }: { product: Product }) {
             toggle(product.slug);
           }}
           aria-label="Хадгалах"
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/95 shadow-[0_6px_16px_-8px_rgba(125,74,92,0.5)] transition-colors hover:bg-white"
+          className="absolute right-3 top-3 text-rose-deep transition-transform hover:scale-110 [filter:drop-shadow(0_1px_3px_rgba(0,0,0,0.4))]"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill={fav ? "var(--rose-deep)" : "none"}>
-            <path d="M12 20s-7-4.5-9.5-9A4.5 4.5 0 0112 5a4.5 4.5 0 019.5 6c-2.5 4.5-9.5 9-9.5 9z" stroke={fav ? "var(--rose-deep)" : "currentColor"} strokeWidth="1.6" strokeLinejoin="round" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill={fav ? "currentColor" : "none"}>
+            <path d="M12 20s-7-4.5-9.5-9A4.5 4.5 0 0112 5a4.5 4.5 0 019.5 6c-2.5 4.5-9.5 9-9.5 9z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
           </svg>
         </button>
 

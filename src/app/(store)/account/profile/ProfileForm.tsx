@@ -7,22 +7,30 @@ import { updateProfile } from "@/app/(store)/account/actions";
 export function ProfileForm({
   name,
   phone,
+  email,
 }: {
   name: string;
   phone: string;
+  email: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [form, setForm] = useState({ name, phone });
+  const [form, setForm] = useState({ name, phone, email });
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setSaved(false);
+    setError("");
     startTransition(async () => {
-      await updateProfile(form);
-      setSaved(true);
-      router.refresh();
+      const res = await updateProfile(form);
+      if (res.ok) {
+        setSaved(true);
+        router.refresh();
+      } else {
+        setError(res.error ?? "Алдаа гарлаа");
+      }
     });
   };
 
@@ -47,6 +55,17 @@ export function ProfileForm({
             placeholder="99xxxxxx"
           />
         </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium text-muted">И-мэйл</span>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className={inputCls}
+            placeholder="name@example.com"
+          />
+        </label>
+        {error && <p className="text-sm text-red-500">{error}</p>}
         <div className="flex items-center gap-3">
           <button
             type="submit"

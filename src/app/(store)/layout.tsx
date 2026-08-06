@@ -1,6 +1,8 @@
 import { CartProvider } from "@/lib/cart";
 import { FavoritesProvider } from "@/lib/favorites";
 import { QuickViewProvider } from "@/lib/quickview";
+import { BadgeSettingsProvider } from "@/lib/badgeSettings";
+import { defaultBadgeSettings } from "@/lib/products";
 import { Header, type MenuCategory } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -60,6 +62,7 @@ export default async function StoreLayout({
       <FavoritesProvider initial={user?.favorites ?? []} loggedIn={!!user}>
         <CartProvider>
           <QuickViewProvider>
+          <BadgeSettingsProvider value={store.badgeSettings ?? defaultBadgeSettings}>
             <Header
               menu={menu}
               announcements={announcements}
@@ -71,6 +74,7 @@ export default async function StoreLayout({
             <Footer content={content} />
             <CartDrawer />
             <QuickView />
+          </BadgeSettingsProvider>
           </QuickViewProvider>
         </CartProvider>
       </FavoritesProvider>

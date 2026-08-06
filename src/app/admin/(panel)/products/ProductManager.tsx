@@ -2,7 +2,14 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { MNT, type Product, type Category, type Subcategory } from "@/lib/products";
+import {
+  MNT,
+  productBadges,
+  type Product,
+  type Category,
+  type Subcategory,
+  type BadgeType,
+} from "@/lib/products";
 import { ImageUploader, SingleImageUploader } from "@/components/admin/ImageUploader";
 import {
   saveProduct,
@@ -13,7 +20,7 @@ import {
   type ProductInput,
 } from "../actions";
 
-const BADGES = ["", "Шинэ", "Хит", "Хямдрал"] as const;
+const BADGE_OPTIONS: BadgeType[] = ["Хит", "Шинэ", "Хямдрал"];
 
 type FormState = ProductInput & { ingredientsText: string };
 
@@ -30,7 +37,7 @@ const empty = (): FormState => ({
   images: [],
   stock: 0,
   usage: "",
-  badge: "",
+  badges: [],
   bundle: false,
   short: "",
   description: "",
@@ -116,7 +123,7 @@ export function ProductManager({
       images: p.images ?? [],
       stock: p.stock ?? 0,
       usage: p.usage ?? "",
-      badge: p.badge ?? "",
+      badges: p.badges ?? (p.badge ? [p.badge] : []),
       bundle: p.bundle ?? false,
       short: p.short,
       description: p.description,
@@ -277,8 +284,11 @@ export function ProductManager({
                       ) : (
                         <Tag color="muted">Үлдэгдэл: {p.stock}</Tag>
                       )}
-                      {onSale && <Tag color="rose">Урамшуулал</Tag>}
-                      {p.badge && <Tag color="gold">{p.badge}</Tag>}
+                      {productBadges(p).map((b) => (
+                        <Tag key={b} color="gold">
+                          {b}
+                        </Tag>
+                      ))}
                       {p.bundle && <Tag color="rose">Багц</Tag>}
                     </div>
                   </td>
@@ -536,20 +546,41 @@ export function ProductManager({
                 className={inputCls}
               />
             </Field>
-            <Field label="Тэмдэг (badge)">
-              <select
-                value={form.badge}
-                onChange={(e) =>
-                  setForm({ ...form, badge: e.target.value as FormState["badge"] })
-                }
-                className={inputCls}
-              >
-                {BADGES.map((b) => (
-                  <option key={b} value={b}>
-                    {b || "— байхгүй —"}
-                  </option>
-                ))}
-              </select>
+            <Field label="Тэмдэг (олон сонгож болно)">
+              <div className="flex flex-wrap gap-2">
+                {BADGE_OPTIONS.map((b) => {
+                  const on = (form.badges ?? []).includes(b);
+                  return (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() =>
+                        setForm((f) =>
+                          f
+                            ? {
+                                ...f,
+                                badges: on
+                                  ? (f.badges ?? []).filter((x) => x !== b)
+                                  : [...(f.badges ?? []), b],
+                              }
+                            : f
+                        )
+                      }
+                      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                        on
+                          ? "border-rose bg-rose/15 text-rose-deep"
+                          : "border-line text-foreground/70 hover:border-rose"
+                      }`}
+                    >
+                      {on ? "✓ " : ""}
+                      {b}
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="mt-1 text-xs text-muted">
+                «Хямдрал» нь хуучин үнэ (compare-at) тавихад автоматаар нэмэгдэнэ.
+              </span>
             </Field>
             <Field label="Найрлага (таслалаар)">
               <input

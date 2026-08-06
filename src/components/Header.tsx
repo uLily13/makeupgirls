@@ -261,10 +261,13 @@ export function Header({
             onClick={closeSearch}
             className="absolute inset-0 bg-plum/25 backdrop-blur-sm"
           />
-          <div className="absolute inset-x-0 top-0 bg-surface shadow-[0_24px_50px_-16px_rgba(125,74,92,0.4)]">
-            <div className="wrap py-5">
-              <form onSubmit={submitSearch} className="flex items-center gap-3">
-                <span className="text-muted">
+          <div className="absolute inset-x-0 top-0 flex justify-center px-4">
+            <div className="animate-popdown mt-20 w-full max-w-2xl origin-top overflow-hidden rounded-3xl border border-line bg-surface/98 p-4 shadow-[0_24px_60px_-16px_rgba(125,74,92,0.45)] backdrop-blur-xl md:mt-24 md:p-5">
+              <form
+                onSubmit={submitSearch}
+                className="flex items-center gap-2 rounded-2xl bg-blush/50 px-4 py-1"
+              >
+                <span className="text-rose-deep">
                   <SearchIcon />
                 </span>
                 <input

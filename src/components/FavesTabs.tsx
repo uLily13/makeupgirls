@@ -57,7 +57,7 @@ export function FavesTabs({
           {list.map((p) => (
             <div
               key={p.slug}
-              className="w-44 shrink-0 snap-start sm:w-52 md:w-56 xl:w-60"
+              className="shrink-0 snap-start basis-[calc((100%-1.25rem)/2)] sm:basis-[calc((100%-2.5rem)/3)] md:basis-[calc((100%-3.75rem)/4)] lg:basis-[calc((100%-5rem)/5)]"
             >
               <ProductCard product={p} />
             </div>

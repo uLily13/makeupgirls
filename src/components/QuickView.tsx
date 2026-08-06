@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuickView } from "@/lib/quickview";
 import { useCart } from "@/lib/cart";
-import { MNT, type Product } from "@/lib/products";
+import { MNT, productBadges, type Product } from "@/lib/products";
 import { ProductVisual } from "./ProductVisual";
+import { ProductBadges } from "./ProductBadges";
 
 // Centered popup that opens from a product card's "Харах" button. Shows the
 // product and lets the customer pick a colour before adding to the cart.
@@ -124,11 +125,15 @@ export function QuickView() {
                 soldOut ? "opacity-60 grayscale" : ""
               }`}
             />
-            {p.badge && (
-              <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-rose-deep shadow-[0_6px_16px_-8px_rgba(125,74,92,0.5)]">
-                {p.badge}
-              </span>
-            )}
+            <ProductBadges
+              badges={productBadges(p)}
+              discount={
+                p.oldPrice && p.oldPrice > p.price
+                  ? Math.round((1 - p.price / p.oldPrice) * 100)
+                  : 0
+              }
+              className="absolute left-3 top-3"
+            />
           </div>
 
           {/* details */}

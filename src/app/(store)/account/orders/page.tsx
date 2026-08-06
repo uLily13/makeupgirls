@@ -2,11 +2,13 @@ import Link from "next/link";
 import { getCustomerUser } from "@/lib/auth";
 import { getStore } from "@/lib/db";
 import { MNT } from "@/lib/products";
+import { PaymentTag } from "@/components/PaymentMethods";
 
 export const dynamic = "force-dynamic";
 
 const statusColor: Record<string, string> = {
   "Хүлээгдэж буй": "bg-amber-50 text-amber-600",
+  "Баталгаажсан": "bg-blue-50 text-blue-600",
   "Хүргэгдсэн": "bg-green-50 text-green-600",
   "Цуцлагдсан": "bg-gray-100 text-gray-400",
 };
@@ -62,9 +64,10 @@ export default async function OrdersPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between border-t border-line pt-3 text-sm">
-            <span className="text-muted">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 text-sm">
+            <span className="flex items-center gap-3 text-muted">
               {o.address ? `${o.address.city}, ${o.address.district}` : "Хаяг байхгүй"}
+              <PaymentTag id={o.paymentMethod} />
             </span>
             <span className="font-medium">
               Нийт: <span className="font-display text-base">{MNT(o.total)}</span>

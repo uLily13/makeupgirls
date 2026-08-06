@@ -253,6 +253,12 @@ input[type="number"] {
 }
 .animate-spin-slow { animation: spin-slow 22s linear infinite; }
 
+@keyframes popdown {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-popdown { animation: popdown 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+
 .link-underline {
   background-image: linear-gradient(var(--rose), var(--rose));
   background-size: 0% 1px;

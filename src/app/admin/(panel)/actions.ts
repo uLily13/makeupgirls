@@ -12,6 +12,8 @@ import type {
   OrderStatus,
   HeroSlide,
   TrendingPost,
+  BadgeType,
+  BadgeSettings,
 } from "@/lib/products";
 
 // NOTE: These are public POST endpoints. Before production, gate every action
@@ -39,7 +41,7 @@ export type ProductInput = {
   images: string[];
   stock: number;
   usage: string;
-  badge?: Product["badge"] | "";
+  badges?: BadgeType[];
   bundle?: boolean;
   short: string;
   description: string;
@@ -49,7 +51,9 @@ export type ProductInput = {
 export async function saveProduct(input: ProductInput) {
   const store = await getStore();
   const idx = store.products.findIndex((p) => p.slug === input.slug);
-  const badge = input.badge ? (input.badge as Product["badge"]) : undefined;
+  const badges = (input.badges ?? []).filter(
+    (b): b is BadgeType => b === "Шинэ" || b === "Хит" || b === "Хямдрал"
+  );
   const colors = input.colors.filter((c) => c.hex);
   const primary = colors[0]?.hex ?? input.shade;
 
@@ -69,7 +73,8 @@ export async function saveProduct(input: ProductInput) {
       images: input.images.filter(Boolean),
       stock: Math.max(0, input.stock),
       usage: input.usage,
-      badge,
+      badges,
+      badge: badges[0],
       bundle: input.bundle ?? false,
       short: input.short,
       description: input.description,
@@ -96,7 +101,8 @@ export async function saveProduct(input: ProductInput) {
       images: input.images.filter(Boolean),
       stock: Math.max(0, input.stock),
       usage: input.usage,
-      badge,
+      badges,
+      badge: badges[0],
       bundle: input.bundle ?? false,
       short: input.short,
       description: input.description,
@@ -131,7 +137,10 @@ export async function startPromotion(slug: string, salePrice: number) {
     p.priceHistory = p.priceHistory ?? [];
     p.priceHistory.push({ at: now(), from: p.price, to: salePrice, note: "Урамшуулал зарлав" });
     p.price = salePrice;
-    p.badge = "Хямдрал";
+    p.badges = Array.from(
+      new Set<BadgeType>([...(p.badges ?? (p.badge ? [p.badge] : [])), "Хямдрал"])
+    );
+    p.badge = p.badges[0];
   }
   await saveStore(store);
   refresh();
@@ -146,7 +155,10 @@ export async function endPromotion(slug: string) {
     p.priceHistory.push({ at: now(), from: p.price, to: p.oldPrice, note: "Урамшуулал дуусгав" });
     p.price = p.oldPrice;
     p.oldPrice = undefined;
-    if (p.badge === "Хямдрал") p.badge = undefined;
+    p.badges = (p.badges ?? (p.badge ? [p.badge] : [])).filter(
+      (b) => b !== "Хямдрал"
+    );
+    p.badge = p.badges[0];
   }
   await saveStore(store);
   refresh();
@@ -356,6 +368,26 @@ export async function saveTrendingPosts(posts: TrendingPost[]) {
     }))
     // Keep a post if it has a playable link or at least a cover image.
     .filter((p) => p.url || p.thumbnail);
+  await saveStore(store);
+  refresh();
+}
+
+// ============================ BADGE SETTINGS ============================
+
+export async function saveBadgeSettings(settings: BadgeSettings) {
+  const store = await getStore();
+  const clean = (s: { color?: string; mode?: string } | undefined, fallbackColor: string) => ({
+    color: /^#[0-9a-f]{6}$/i.test(s?.color ?? "") ? (s!.color as string) : fallbackColor,
+    mode: (["icon", "text", "both"].includes(s?.mode ?? "") ? s!.mode : "icon") as
+      | "icon"
+      | "text"
+      | "both",
+  });
+  store.badgeSettings = {
+    Хит: clean(settings.Хит, "#c56a5b"),
+    Шинэ: clean(settings.Шинэ, "#059669"),
+    Хямдрал: clean(settings.Хямдрал, "#c56a5b"),
+  };
   await saveStore(store);
   refresh();
 }

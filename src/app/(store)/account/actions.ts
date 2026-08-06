@@ -83,15 +83,30 @@ async function requireUser() {
 
 // ============================ PROFILE ============================
 
+const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
 export async function updateProfile(input: {
   name: string;
   phone: string;
+  email?: string;
 }): Promise<Result> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, error: "Нэвтэрнэ үү." };
+
+  const email = (input.email ?? "").trim().toLowerCase();
+  if (email) {
+    if (!emailOk(email))
+      return { ok: false, error: "И-мэйл хаяг буруу байна." };
+    const taken = ctx.store.users.some(
+      (u) => u.id !== ctx.user.id && u.email?.toLowerCase() === email
+    );
+    if (taken) return { ok: false, error: "Энэ и-мэйл өөр бүртгэлд ашиглагдсан." };
+  }
+
   ctx.user.name = input.name.trim() || ctx.user.name;
   const phone = normPhone(input.phone);
   if (phone && phoneOk(phone)) ctx.user.phone = phone;
+  ctx.user.email = email || undefined;
   await saveStore(ctx.store);
   revalidatePath("/account", "layout");
   return { ok: true };
@@ -197,6 +212,7 @@ export async function setDefaultAddress(id: string): Promise<Result> {
 export async function placeOrder(input: {
   items: { slug: string; qty: number; shade: string; color?: string }[];
   addressId?: string;
+  paymentMethod?: string;
 }): Promise<{ ok: boolean; error?: string; orderId?: string }> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, error: "Захиалга хийхийн тулд нэвтэрнэ үү." };
@@ -268,6 +284,11 @@ export async function placeOrder(input: {
     total: net + shipping,
     address,
     status: "Хүлээгдэж буй",
+    paymentMethod: (["qpay", "khan", "golomt", "card", "cash"].includes(
+      input.paymentMethod ?? ""
+    )
+      ? input.paymentMethod
+      : undefined) as Order["paymentMethod"],
     createdAt: new Date().toISOString(),
   };
   store.orders.push(order);

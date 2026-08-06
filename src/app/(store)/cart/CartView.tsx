@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useCart } from "@/lib/cart";
-import { MNT, type Address, type Promotion } from "@/lib/products";
+import { MNT, paymentLabel, type Address, type Promotion, type PaymentMethodId } from "@/lib/products";
 import { applyPromotions } from "@/lib/promotions";
+import { PaymentSelector } from "@/components/PaymentMethods";
 import { placeOrder, saveAddress } from "@/app/(store)/account/actions";
 
 const emptyAddr = () => ({
@@ -40,6 +41,7 @@ export function CartView({
   const [showAddrForm, setShowAddrForm] = useState(addresses.length === 0);
   const [addrForm, setAddrForm] = useState(emptyAddr());
   const [done, setDone] = useState<string | null>(null);
+  const [payMethod, setPayMethod] = useState<PaymentMethodId | null>(null);
   const [error, setError] = useState("");
 
   // Auto-open checkout when returning from login (?checkout=1).
@@ -93,6 +95,7 @@ export function CartView({
           color: i.color,
         })),
         addressId: addrId,
+        paymentMethod: payMethod ?? undefined,
       });
       if (res.ok) {
         clear();
@@ -116,6 +119,14 @@ export function CartView({
           Захиалгын дугаар <span className="font-semibold text-foreground">{done}</span>.
           Бид тантай удахгүй холбогдоно.
         </p>
+        {payMethod && (
+          <p className="-mt-2 text-sm text-muted">
+            Төлбөрийн хэлбэр:{" "}
+            <span className="font-medium text-foreground">
+              {paymentLabel(payMethod)}
+            </span>
+          </p>
+        )}
         <div className="flex gap-3">
           <Link href="/account/orders" className="rounded-full bg-foreground px-6 py-3 text-sm font-medium text-white">
             Захиалгаа харах
@@ -327,6 +338,16 @@ export function CartView({
                   ))}
                 </div>
 
+                {/* Payment method */}
+                <div className="mt-5 border-t border-line pt-4">
+                  <p className="mb-3 text-sm text-muted">Төлбөрийн хэлбэр сонгоно уу</p>
+                  <PaymentSelector value={payMethod} onChange={setPayMethod} />
+                  <p className="mt-2 text-[11px] text-muted">
+                    Онлайн төлбөрийн систем удахгүй холбогдоно. Одоогоор хэлбэрээ
+                    сонгоод захиалгаа баталгаажуулна.
+                  </p>
+                </div>
+
                 <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
                   <span className="text-sm text-muted">Нийт төлөх</span>
                   <span className="font-display text-xl">{MNT(total)}</span>
@@ -340,10 +361,14 @@ export function CartView({
                   </button>
                   <button
                     onClick={submitOrder}
-                    disabled={pending || !addrId}
+                    disabled={pending || !addrId || !payMethod}
                     className="rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
                   >
-                    {pending ? "Захиалж байна…" : "Захиалах"}
+                    {pending
+                      ? "Баталгаажуулж байна…"
+                      : payMethod
+                        ? "Төлбөр төлөх"
+                        : "Төлбөрийн хэлбэр сонгоно уу"}
                   </button>
                 </div>
               </>

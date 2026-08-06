@@ -26,11 +26,14 @@ export const seedContent: Omit<ContentItem, "history">[] = [
   { key: "home.best.title", group: "Нүүр — Хэсгүүд", label: "Хит — гарчиг", value: "Хит бүтээгдэхүүн" },
   { key: "home.new.eyebrow", group: "Нүүр — Хэсгүүд", label: "Шинэ — жижиг гарчиг", value: "Шинээр ирсэн" },
   { key: "home.new.title", group: "Нүүр — Хэсгүүд", label: "Шинэ — гарчиг", value: "Шинэ цуглуулга" },
+  { key: "home.sale.eyebrow", group: "Нүүр — Хэсгүүд", label: "Хямдрал — жижиг гарчиг", value: "Хямдрал" },
+  { key: "home.sale.title", group: "Нүүр — Хэсгүүд", label: "Хямдрал — гарчиг", value: "Хямдралтай бүтээгдэхүүн" },
 
   // Home section background images (заавал биш)
   { key: "home.faves.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Онцлох» хэсгийн дэвсгэр зураг", value: "", image: true },
   { key: "home.cat.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Ангилал» хэсгийн дэвсгэр зураг", value: "", image: true },
   { key: "home.new.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Шинэ цуглуулга» хэсгийн дэвсгэр зураг", value: "", image: true },
+  { key: "home.sale.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Хямдрал» хэсгийн дэвсгэр зураг", value: "", image: true },
   { key: "home.vp.bg", group: "Нүүр — Дэвсгэр зураг", label: "«Давуу тал» хэсгийн дэвсгэр зураг", value: "", image: true },
 
   // Editorial

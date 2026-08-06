@@ -29,6 +29,22 @@ export type ColorVariant = {
   image?: string; // optional image URL for this colour
 };
 
+export type BadgeType = "Шинэ" | "Хит" | "Хямдрал";
+
+// Canonical display order for badges.
+export const BADGE_ORDER: BadgeType[] = ["Хит", "Шинэ", "Хямдрал"];
+
+// How a badge is shown on the storefront — admin-configurable.
+export type BadgeDisplay = "icon" | "text" | "both";
+export type BadgeStyle = { color: string; mode: BadgeDisplay };
+export type BadgeSettings = Record<BadgeType, BadgeStyle>;
+
+export const defaultBadgeSettings: BadgeSettings = {
+  Хит: { color: "#c56a5b", mode: "icon" },
+  Шинэ: { color: "#059669", mode: "icon" },
+  Хямдрал: { color: "#c56a5b", mode: "text" },
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -45,7 +61,8 @@ export type Product = {
   images: string[]; // image URLs (first = main); empty = gradient fallback
   stock: number; // available inventory
   usage: string; // хэрэглэх заавар
-  badge?: "Шинэ" | "Хит" | "Хямдрал";
+  badge?: BadgeType; // legacy single badge — superseded by `badges`
+  badges?: BadgeType[]; // one or more badges (Шинэ / Хит / Хямдрал)
   bundle?: boolean; // marketed as a bundle / value set (shown in the "Багц" tab)
   short: string;
   description: string;
@@ -187,6 +204,21 @@ export type OrderStatus =
   | "Хүргэгдсэн"
   | "Цуцлагдсан";
 
+// Payment methods (real gateway integration comes later — for now the customer
+// just picks one and the choice is recorded on the order).
+export const PAYMENT_METHODS = [
+  { id: "qpay", label: "QPay" },
+  { id: "khan", label: "Хаан банк" },
+  { id: "golomt", label: "Голомт банк" },
+  { id: "card", label: "Картаар" },
+  { id: "cash", label: "Бэлнээр" },
+] as const;
+
+export type PaymentMethodId = (typeof PAYMENT_METHODS)[number]["id"];
+
+export const paymentLabel = (id?: string) =>
+  PAYMENT_METHODS.find((m) => m.id === id)?.label ?? "—";
+
 export type Order = {
   id: string;
   userId: string;
@@ -197,6 +229,7 @@ export type Order = {
   total: number;
   address: Address | null;
   status: OrderStatus;
+  paymentMethod?: PaymentMethodId; // customer-selected payment method
   stockApplied?: boolean; // stock already decremented (on confirm)
   createdAt: string;
 };
@@ -214,6 +247,7 @@ export type Store = {
   subscribers: Subscriber[];
   heroSlides: HeroSlide[];
   trendingPosts: TrendingPost[];
+  badgeSettings?: BadgeSettings;
   updatedAt: string;
 };
 
@@ -475,6 +509,16 @@ export const products: SeedProduct[] = [
 ];
 
 // -------- Derived helpers (operate on store data) --------
+
+/** Effective badge list for a product: its editorial badges plus an automatic
+ *  "Хямдрал" when it's on sale (oldPrice > price), in canonical order. */
+export function productBadges(
+  p: Pick<Product, "badges" | "badge" | "price" | "oldPrice">
+): BadgeType[] {
+  const set = new Set<BadgeType>(p.badges ?? (p.badge ? [p.badge] : []));
+  if (p.oldPrice && p.oldPrice > p.price) set.add("Хямдрал");
+  return BADGE_ORDER.filter((b) => set.has(b));
+}
 
 /** Average review rating for a product, falling back to the seed rating. */
 export function ratingFor(

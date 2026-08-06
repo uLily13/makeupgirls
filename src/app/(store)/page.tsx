@@ -6,8 +6,14 @@ import { ProductCard } from "@/components/ProductCard";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { AutoScroller } from "@/components/AutoScroller";
 import { getStore, resolveContent, visibleCategories, withRatings } from "@/lib/db";
+import { productBadges } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
+
+// Horizontal-row item width: shows 2 / 3 / 4 / 5 cards per view (gap 1.25rem),
+// the rest scroll sideways.
+const productSlideCls =
+  "shrink-0 snap-start basis-[calc((100%-1.25rem)/2)] sm:basis-[calc((100%-2.5rem)/3)] md:basis-[calc((100%-3.75rem)/4)] lg:basis-[calc((100%-5rem)/5)]";
 
 export default async function Home() {
   const store = await getStore();
@@ -15,11 +21,19 @@ export default async function Home() {
   const cats = visibleCategories(store);
   const prods = withRatings(store);
 
-  const bestSellers = prods.filter((p) => p.badge === "Хит").slice(0, 10);
+  // A product appears in every section its badges qualify it for.
+  const bestSellers = prods
+    .filter((p) => productBadges(p).includes("Хит"))
+    .slice(0, 10);
   const bundles = prods
     .filter((p) => p.bundle || p.category === "sets")
     .slice(0, 10);
-  const newArrivals = prods.filter((p) => p.badge === "Шинэ").slice(0, 5);
+  const newArrivals = prods
+    .filter((p) => productBadges(p).includes("Шинэ"))
+    .slice(0, 10);
+  const discounted = prods
+    .filter((p) => productBadges(p).includes("Хямдрал"))
+    .slice(0, 10);
   const c = (k: string, fallback = "") => content[k] ?? fallback;
 
   return (
@@ -54,7 +68,7 @@ export default async function Home() {
             <Link
               key={cat.slug}
               href={`/shop?cat=${cat.slug}`}
-              className="card-hover group relative block aspect-[4/5] w-40 shrink-0 snap-start overflow-hidden rounded-3xl sm:w-48 lg:w-52"
+              className="card-hover group relative block aspect-[4/5] shrink-0 snap-start basis-[calc((100%-1rem)/2)] overflow-hidden rounded-3xl sm:basis-[calc((100%-2rem)/3)] md:basis-[calc((100%-3rem)/4)] lg:basis-[calc((100%-4rem)/5)]"
             >
               {cat.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -98,10 +112,28 @@ export default async function Home() {
             className="no-scrollbar -mx-4 flex snap-x gap-x-5 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0"
           >
             {newArrivals.map((p) => (
-              <div
-                key={p.slug}
-                className="w-44 shrink-0 snap-start sm:w-52 md:w-56 xl:w-60"
-              >
+              <div key={p.slug} className={productSlideCls}>
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </AutoScroller>
+          <ViewAllButton />
+        </SectionBand>
+      )}
+
+      {/* Discounted products */}
+      {discounted.length > 0 && (
+        <SectionBand bg={c("home.sale.bg")} base="bg-blush/60">
+          <CenterHead
+            eyebrow={c("home.sale.eyebrow", "Хямдрал")}
+            title={c("home.sale.title", "Хямдралтай бүтээгдэхүүн")}
+          />
+          <AutoScroller
+            interval={5000}
+            className="no-scrollbar -mx-4 flex snap-x gap-x-5 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0"
+          >
+            {discounted.map((p) => (
+              <div key={p.slug} className={productSlideCls}>
                 <ProductCard product={p} />
               </div>
             ))}

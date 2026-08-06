@@ -5,5 +5,11 @@ export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
   const user = (await getCustomerUser())!;
-  return <ProfileForm name={user.name} phone={user.phone ?? ""} />;
+  return (
+    <ProfileForm
+      name={user.name}
+      phone={user.phone ?? ""}
+      email={user.email ?? ""}
+    />
+  );
 }

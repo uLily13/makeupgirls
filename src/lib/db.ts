@@ -4,6 +4,7 @@ import {
   categories as seedCategories,
   subcategories as seedSubcategories,
   products as seedProducts,
+  defaultBadgeSettings,
   type Store,
   type ContentItem,
   type User,
@@ -158,6 +159,7 @@ function buildSeed(): Store {
     subscribers: [],
     heroSlides: defaultHeroSlides(),
     trendingPosts: [],
+    badgeSettings: { ...defaultBadgeSettings },
     updatedAt: new Date().toISOString(),
   };
 }
@@ -202,6 +204,18 @@ export async function getStore(): Promise<Store> {
   if (!store.promotions) { store.promotions = []; changed = true; }
   if (!store.feedback) { store.feedback = []; changed = true; }
   if (!store.subscribers) { store.subscribers = []; changed = true; }
+  if (!store.badgeSettings) {
+    store.badgeSettings = { ...defaultBadgeSettings };
+    changed = true;
+  } else {
+    // Back-fill any badge type missing from a previously-saved settings object.
+    for (const k of ["Хит", "Шинэ", "Хямдрал"] as const) {
+      if (!store.badgeSettings[k]) {
+        store.badgeSettings[k] = defaultBadgeSettings[k];
+        changed = true;
+      }
+    }
+  }
 
   // Migrate the old fixed hero content keys into the dynamic heroSlides array.
   if (!store.heroSlides) {
@@ -270,6 +284,10 @@ export async function getStore(): Promise<Store> {
     }
     if (p.usage === undefined) {
       p.usage = "";
+      changed = true;
+    }
+    if (!p.badges) {
+      p.badges = p.badge ? [p.badge] : [];
       changed = true;
     }
   }

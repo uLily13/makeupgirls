@@ -11,6 +11,7 @@ const links = [
   { href: "/admin/trending", label: "Trending / Reels", icon: "▶" },
   { href: "/admin/orders", label: "Захиалга", icon: "🛍" },
   { href: "/admin/products", label: "Бүтээгдэхүүн", icon: "▤" },
+  { href: "/admin/badges", label: "Тэмдэг (badge)", icon: "🏷" },
   { href: "/admin/promotions", label: "Хямдрал / Урамшуулал", icon: "％" },
   { href: "/admin/menu", label: "Цэс / Ангилал", icon: "☰" },
   { href: "/admin/content", label: "Текст контент", icon: "✎" },
